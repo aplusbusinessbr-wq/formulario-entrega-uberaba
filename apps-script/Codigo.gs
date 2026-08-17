@@ -35,9 +35,62 @@ const CONFIG = {
 
 const COLUNAS = [
   'Recebido em', 'Protocolo', 'Empresa', 'CNPJ', 'Telefone', 'Responsável',
-  'Data da entrega', 'Horário', 'Produto', 'Nota fiscal',
+  'Data da entrega', 'Data (ISO)', 'Horário', 'Produto', 'Nota fiscal',
   'Paletes', 'Volumes', 'Total estimado (R$)', 'Observação'
 ];
+
+// posições usadas na conferência de disponibilidade (base 0)
+const COL_DATA_ISO = 7;
+const COL_HORA = 8;
+
+/**
+ * O Sheets converte sozinho o que parece data ou hora: '20/08/2026' vira
+ * um Date e '07:30' vira uma hora. Na leitura de volta, portanto, nem
+ * sempre chega texto — estas duas funções normalizam os dois casos.
+ */
+function paraIso(valor) {
+  if (valor instanceof Date) {
+    return Utilities.formatDate(valor, CONFIG.fuso, 'yyyy-MM-dd');
+  }
+  const s = String(valor === null || valor === undefined ? '' : valor).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);   // dd/MM/yyyy
+  return m ? (m[3] + '-' + m[2] + '-' + m[1]) : '';
+}
+
+function paraHora(valor) {
+  if (valor instanceof Date) {
+    return Utilities.formatDate(valor, CONFIG.fuso, 'HH:mm');
+  }
+  return String(valor === null || valor === undefined ? '' : valor).trim();
+}
+
+/** Todas as janelas já reservadas, agrupadas por data, dentro de um mês 'aaaa-mm'. */
+function ocupadosDoMes(mes) {
+  const aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.aba);
+  const mapa = {};
+  if (!aba || aba.getLastRow() < 2) return mapa;
+
+  const linhas = aba.getRange(2, 1, aba.getLastRow() - 1, COLUNAS.length).getValues();
+  for (let i = 0; i < linhas.length; i++) {
+    const dataIso = paraIso(linhas[i][COL_DATA_ISO]);
+    if (dataIso.indexOf(mes) !== 0) continue;
+
+    const hora = paraHora(linhas[i][COL_HORA]);
+    if (!hora) continue;
+
+    if (!mapa[dataIso]) mapa[dataIso] = [];
+    if (mapa[dataIso].indexOf(hora) === -1) mapa[dataIso].push(hora);
+  }
+  return mapa;
+}
+
+/** Janelas já reservadas em uma data 'aaaa-mm-dd'. */
+function horariosOcupadosEm(dataIso) {
+  if (!dataIso) return [];
+  const doMes = ocupadosDoMes(dataIso.slice(0, 7));
+  return doMes[dataIso] || [];
+}
 
 /**
  * Recebe o POST do formulário.
@@ -46,6 +99,11 @@ const COLUNAS = [
  * faria o navegador bloquear o envio por CORS.
  */
 function doPost(e) {
+  // Uma entrega por janela. A trava serializa os envios: sem ela, dois
+  // fornecedores que clicassem no mesmo segundo passariam os dois pela
+  // verificação antes de qualquer um gravar, e a janela sairia duplicada.
+  const trava = LockService.getScriptLock();
+
   try {
     if (!e || !e.postData || !e.postData.contents) {
       return responder({ ok: false, erro: 'Requisição sem corpo.' });
@@ -53,7 +111,18 @@ function doPost(e) {
 
     const d = JSON.parse(e.postData.contents);
 
+    trava.waitLock(20000);
+
+    const dataIso = d.dataIso || paraIso(d.data);
+    const jaOcupados = horariosOcupadosEm(dataIso);
+    if (jaOcupados.indexOf(d.hora) !== -1) {
+      return responder({ ok: false, motivo: 'ocupado', ocupados: jaOcupados });
+    }
+
     gravarNaPlanilha(d);
+
+    // o e-mail sai depois da gravação: se ele falhar, o agendamento
+    // já está salvo e ninguém perde a janela
     enviarEmail(d);
 
     return responder({ ok: true, protocolo: d.protocolo });
@@ -62,12 +131,28 @@ function doPost(e) {
     // registra o erro no log de execuções para diagnóstico
     console.error(err);
     return responder({ ok: false, erro: String(err) });
+
+  } finally {
+    try { trava.releaseLock(); } catch (ignorado) {}
   }
 }
 
-/** Permite abrir a URL no navegador só para conferir se está no ar. */
-function doGet() {
-  return responder({ ok: true, servico: 'Agendamento de Entrega — Uberaba Supermercados' });
+/**
+ * GET sem parâmetros: confere se o serviço está no ar.
+ * GET com ?mes=2026-08: devolve as janelas já reservadas naquele mês, para
+ * o formulário apagar os horários indisponíveis antes de a pessoa escolher.
+ */
+function doGet(e) {
+  try {
+    const mes = e && e.parameter ? e.parameter.mes : null;
+    if (!mes) {
+      return responder({ ok: true, servico: 'Agendamento de Entrega — Uberaba Supermercados' });
+    }
+    return responder({ ok: true, mes: mes, ocupados: ocupadosDoMes(mes) });
+  } catch (err) {
+    console.error(err);
+    return responder({ ok: false, erro: String(err) });
+  }
 }
 
 function responder(obj) {
@@ -94,6 +179,10 @@ function gravarNaPlanilha(d) {
         .setBackground('#EB3439')
         .setFontColor('#FFFFFF');
     aba.setFrozenRows(1);
+
+    // colunas de data ISO e horário como texto puro, senão o Sheets
+    // converte os valores e a conferência de disponibilidade fica frágil
+    aba.getRange(1, COL_DATA_ISO + 1, aba.getMaxRows(), 2).setNumberFormat('@');
   }
 
   aba.appendRow([
@@ -104,6 +193,7 @@ function gravarNaPlanilha(d) {
     d.telefone || '',
     d.responsavel || '',
     d.data || '',
+    d.dataIso || paraIso(d.data),
     d.hora || '',
     d.produto || '',
     d.nf || '',
@@ -235,7 +325,8 @@ function testarEnvio() {
     telefone: '(34) 99988-7766',
     responsavel: 'Carlos Almeida',
     data: '20/08/2026',
-    hora: '08:30',
+    dataIso: '2026-08-20',
+    hora: '09:30',
     produto: 'Hortifrúti',
     nf: '128455',
     paletes: 6,

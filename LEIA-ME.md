@@ -136,6 +136,40 @@ Tudo fica no bloco `CONFIG`, no fim do arquivo:
 Taxas confirmadas: **R$ 30,00 por palete** e **R$ 1,00 por volume**
 (`precoPalete` e `precoVolume` no `CONFIG`).
 
+### Uma entrega por janela
+
+O dia tem 4 janelas (`CONFIG.horarios`) e cada uma aceita **um** agendamento.
+O controle acontece em duas camadas:
+
+1. **Na tela** — ao abrir o formulário, ele pergunta ao Apps Script quais janelas
+   do mês já foram reservadas. As ocupadas aparecem riscadas, com a etiqueta
+   "reservado", e não podem ser clicadas. Um dia com as 4 janelas tomadas fica
+   cinza no calendário.
+2. **Na gravação** — o Apps Script confere de novo antes de escrever na planilha,
+   dentro de um `LockService`. É esta camada que vale: se dois fornecedores
+   clicarem em "enviar" no mesmo segundo para a mesma janela, um passa e o outro
+   recebe *"Essa janela acabou de ser reservada por outro fornecedor"*, com a
+   tela já atualizada para ele escolher outra.
+
+A primeira camada sozinha não bastaria — entre montar a tela e clicar em enviar
+pode passar meia hora. A segunda sozinha funcionaria, mas só avisaria depois de
+a pessoa preencher tudo.
+
+> **Enquanto o `endpoint` estiver vazio, todas as janelas aparecem livres.** A
+> consulta de disponibilidade depende do Apps Script publicado (Parte 1). Se a
+> consulta falhar por rede, o formulário também mostra tudo livre em vez de
+> travar o fornecedor — e a conferência final na gravação continua valendo.
+
+**Para liberar uma janela** (fornecedor desmarcou, entrega cancelada): apague a
+linha correspondente na planilha. O horário volta a aparecer como livre.
+
+### Dias sem recebimento
+
+Sábados e domingos ficam cinza no calendário, inclicáveis. A regra está em
+`CONFIG.diasSemana`, onde `0` é domingo e `6` é sábado — hoje `[1,2,3,4,5]`.
+Para fechar também um feriado específico, hoje é preciso mexer no código; se
+isso virar rotina, vale criar uma lista de datas bloqueadas.
+
 ### O logo
 
 O logo oficial já está no lugar, sobre uma placa branca — necessária porque o

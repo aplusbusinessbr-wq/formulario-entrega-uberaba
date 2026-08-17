@@ -276,6 +276,63 @@ legend .num{
 .field label,.field .lbl{font-size:13.5px;font-weight:600}
 .req{color:var(--red);font-weight:700}
 
+/* ---------- calendário próprio ---------- */
+/* o input[type=date] nativo não deixa desabilitar dias soltos:
+   fim de semana e dia lotado precisam ficar inclicáveis */
+.cal{
+  border:1.5px solid var(--line-strong);
+  border-radius:var(--r-md);
+  background:#fff;
+  padding:10px;
+  user-select:none;
+}
+.cal[aria-invalid=true]{border-color:var(--danger);background:#FFF7F6}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
+.cal-mes{
+  font-family:'Oswald',sans-serif;font-weight:500;
+  font-size:14px;letter-spacing:.06em;text-transform:uppercase;
+  text-align:center;flex:1;
+}
+.cal-nav{
+  flex:none;width:34px;height:34px;
+  display:grid;place-items:center;
+  font-size:21px;line-height:1;
+  border:1.5px solid var(--line-strong);
+  border-radius:9px;
+  background:#fff;color:var(--ink);
+  cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s;
+}
+.cal-nav:hover:not([disabled]){border-color:var(--red);color:var(--red)}
+.cal-nav[disabled]{opacity:.3;cursor:default}
+.cal-nav:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+
+.cal-dows,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dows span{
+  text-align:center;font-size:10px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);padding:4px 0 6px;
+}
+.cal-day{
+  aspect-ratio:1;
+  min-height:36px;
+  display:grid;place-items:center;
+  font-family:'Figtree',sans-serif;
+  font-size:14px;font-weight:600;
+  border:1.5px solid transparent;
+  border-radius:9px;
+  background:transparent;color:var(--ink);
+  cursor:pointer;
+  transition:background .14s,border-color .14s,color .14s;
+}
+.cal-day.vazio{visibility:hidden;cursor:default}
+.cal-day:hover:not([disabled]){background:var(--red-050);border-color:var(--red)}
+.cal-day[disabled]{color:#C6BCB0;cursor:not-allowed;background:transparent}
+.cal-day[aria-pressed=true]{background:var(--red);border-color:var(--red);color:#fff}
+.cal-day.hoje:not([aria-pressed=true]){border-color:var(--line-strong)}
+.cal-day:focus-visible{outline:3px solid var(--teal);outline-offset:1px}
+.cal-legenda{font-size:11.5px;color:var(--ink-soft);margin:0;line-height:1.4}
+
 /* ---------- janelas de horário ---------- */
 .slots{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .slot{cursor:pointer;display:block}
@@ -302,6 +359,27 @@ legend .num{
 }
 .slot input:focus-visible + span{outline:3px solid var(--teal);outline-offset:2px}
 .slots[aria-invalid=true] .slot span{border-color:var(--danger);background:#FFF7F6}
+
+/* janela já reservada por outro fornecedor: uma entrega por horário */
+.slot.ocupado{cursor:not-allowed}
+.slot.ocupado span{
+  background:var(--shell);
+  border-color:var(--line);
+  color:#B3A99D;
+  text-decoration:line-through;
+  text-decoration-thickness:1.5px;
+}
+.slot.ocupado:hover span{border-color:var(--line);color:#B3A99D}
+/* o ::after vira um item do flex e desce sozinho para a linha de baixo */
+.slot.ocupado span{flex-direction:column;gap:1px;padding:9px 8px}
+.slot.ocupado span::after{
+  content:"reservado";
+  font-family:'Figtree',sans-serif;
+  font-size:9.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  text-decoration:none;
+  color:#B3A99D;
+}
 .hint{font-size:12px;color:var(--ink-soft);line-height:1.4;margin:0}
 
 input[type=text],input[type=tel],input[type=date],select,textarea{
@@ -698,14 +776,26 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
 
           <div class="grid two">
             <div class="field">
-              <label for="data">Data da entrega <span class="req">*</span></label>
-              <input type="date" id="data" name="data" aria-describedby="data-err">
+              <span class="lbl" id="data-label">Data da entrega <span class="req">*</span></span>
+              <div class="cal" id="data" role="group" aria-labelledby="data-label" aria-describedby="data-err">
+                <div class="cal-head">
+                  <button type="button" class="cal-nav" id="cal-prev" aria-label="Mês anterior">&#8249;</button>
+                  <div class="cal-mes" id="cal-mes" aria-live="polite"></div>
+                  <button type="button" class="cal-nav" id="cal-next" aria-label="Próximo mês">&#8250;</button>
+                </div>
+                <div class="cal-dows" aria-hidden="true">
+                  <span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span>
+                </div>
+                <div class="cal-grid" id="cal-grid"></div>
+              </div>
+              <p class="cal-legenda">Cinza = sem recebimento (fim de semana, data passada ou dia lotado).</p>
               <p class="err" id="data-err"></p>
             </div>
 
             <div class="field">
               <span class="lbl" id="hora-label">Horário <span class="req">*</span></span>
               <div class="slots" id="hora" role="radiogroup" aria-labelledby="hora-label" aria-describedby="hora-err"></div>
+              <p class="hint" id="hora-aviso">Escolha primeiro a data.</p>
               <p class="err" id="hora-err"></p>
             </div>
           </div>
@@ -916,15 +1006,149 @@ selProduto.innerHTML = '<option value="">Selecione o produto</option>' +
 // do que um seletor, e mostra todas as opções de uma vez)
 const boxHora = $('#hora');
 boxHora.innerHTML = CONFIG.horarios.map(h => `
-  <label class="slot">
+  <label class="slot" data-hora="${h}">
     <input type="radio" name="hora" value="${h}">
     <span>${h}</span>
   </label>`).join('');
 
-// data mínima = hoje
-const inputData = $('#data');
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-inputData.min = iso(new Date());
+
+/* =========================================================================
+   AGENDA — calendário próprio + disponibilidade
+   Uma entrega por janela: o que já foi reservado sai do ar para os outros.
+   ========================================================================= */
+
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho',
+               'julho','agosto','setembro','outubro','novembro','dezembro'];
+
+const agenda = {
+  dataEscolhida: '',
+  mesExibido: null,          // Date no dia 1 do mês na tela
+  ocupados: {},              // { '2026-08-18': ['07:30','13:00'] }
+  mesesCarregados: new Set() // evita repetir consulta do mesmo mês
+};
+
+const boxCal   = $('#data');
+const gradeCal = $('#cal-grid');
+const hoje0h   = new Date(); hoje0h.setHours(0, 0, 0, 0);
+
+const ocupadosDe = (dataIso) => agenda.ocupados[dataIso] || [];
+const diaUtil    = (dataIso) => CONFIG.diasSemana.includes(new Date(dataIso + 'T12:00:00').getDay());
+const diaLotado  = (dataIso) => ocupadosDe(dataIso).length >= CONFIG.horarios.length;
+
+function diaSelecionavel(dataIso) {
+  return dataIso >= iso(hoje0h) && diaUtil(dataIso) && !diaLotado(dataIso);
+}
+
+function desenhaCalendario() {
+  const base = agenda.mesExibido;
+  const ano = base.getFullYear(), mes = base.getMonth();
+
+  $('#cal-mes').textContent = `${MESES[mes]} de ${ano}`;
+
+  // não deixa navegar para trás do mês corrente: lá não há data válida
+  $('#cal-prev').disabled = (ano === hoje0h.getFullYear() && mes === hoje0h.getMonth());
+
+  const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+  const totalDias = new Date(ano, mes + 1, 0).getDate();
+
+  let html = '';
+  for (let i = 0; i < primeiroDiaSemana; i++) {
+    html += '<span class="cal-day vazio"></span>';
+  }
+  for (let dia = 1; dia <= totalDias; dia++) {
+    const dataIso = iso(new Date(ano, mes, dia));
+    const ok = diaSelecionavel(dataIso);
+    const ehHoje = dataIso === iso(hoje0h);
+    const marcado = dataIso === agenda.dataEscolhida;
+
+    let motivo = '';
+    if (!ok) {
+      if (dataIso < iso(hoje0h)) motivo = 'data já passou';
+      else if (!diaUtil(dataIso)) motivo = 'sem recebimento neste dia';
+      else motivo = 'todas as janelas reservadas';
+    }
+
+    html += `<button type="button" class="cal-day${ehHoje ? ' hoje' : ''}"
+      data-iso="${dataIso}" aria-pressed="${marcado}"
+      ${ok ? '' : 'disabled'}
+      aria-label="${dia} de ${MESES[mes]}${motivo ? ' — ' + motivo : ''}">${dia}</button>`;
+  }
+  gradeCal.innerHTML = html;
+}
+
+function desenhaHorarios() {
+  const data = agenda.dataEscolhida;
+  const tomados = ocupadosDe(data);
+  const aviso = $('#hora-aviso');
+
+  boxHora.querySelectorAll('.slot').forEach(slot => {
+    const hora = slot.dataset.hora;
+    const radio = slot.querySelector('input');
+    const ocupado = !data || tomados.includes(hora);
+
+    slot.classList.toggle('ocupado', !!data && tomados.includes(hora));
+    radio.disabled = ocupado;
+    // se a janela escolhida foi reservada por outro no meio do caminho
+    if (radio.checked && ocupado) radio.checked = false;
+  });
+
+  if (!data) {
+    aviso.textContent = 'Escolha primeiro a data.';
+  } else if (tomados.length) {
+    const livres = CONFIG.horarios.length - tomados.length;
+    aviso.textContent = livres === 1
+      ? 'Resta 1 janela neste dia.'
+      : `Restam ${livres} janelas neste dia.`;
+  } else {
+    aviso.textContent = 'Todas as janelas livres neste dia.';
+  }
+}
+
+/* Consulta ao Apps Script quais janelas do mês já foram reservadas.
+   Falha aqui nunca bloqueia o fornecedor: sem resposta, tudo aparece
+   como livre e a checagem final acontece no envio, do lado do servidor. */
+async function carregaDisponibilidade(base) {
+  const chave = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}`;
+  if (!CONFIG.endpoint || agenda.mesesCarregados.has(chave)) return;
+
+  try {
+    const r = await fetch(`${CONFIG.endpoint}?mes=${chave}`, { method: 'GET' });
+    const dados = await r.json();
+    if (dados && dados.ocupados) {
+      Object.assign(agenda.ocupados, dados.ocupados);
+      agenda.mesesCarregados.add(chave);
+      desenhaCalendario();
+      desenhaHorarios();
+    }
+  } catch (err) {
+    console.warn('Não foi possível consultar a agenda:', err);
+  }
+}
+
+function mudaMes(delta) {
+  const b = agenda.mesExibido;
+  agenda.mesExibido = new Date(b.getFullYear(), b.getMonth() + delta, 1);
+  desenhaCalendario();
+  carregaDisponibilidade(agenda.mesExibido);
+}
+
+$('#cal-prev').addEventListener('click', () => mudaMes(-1));
+$('#cal-next').addEventListener('click', () => mudaMes(1));
+
+gradeCal.addEventListener('click', (e) => {
+  const btn = e.target.closest('.cal-day');
+  if (!btn || btn.disabled || !btn.dataset.iso) return;
+  agenda.dataEscolhida = btn.dataset.iso;
+  desenhaCalendario();
+  desenhaHorarios();
+  valida('data');
+});
+
+agenda.mesExibido = new Date(hoje0h.getFullYear(), hoje0h.getMonth(), 1);
+desenhaCalendario();
+desenhaHorarios();
+carregaDisponibilidade(agenda.mesExibido);
 
 /* =========================================================================
    MÁSCARAS
@@ -986,24 +1210,31 @@ const REGRAS = {
   empresa:  v => v.trim().length >= 2 ? '' : 'Informe o nome da empresa.',
   cnpj:     v => !v.trim() ? 'Informe o CNPJ.' : (validaCNPJ(v) ? '' : 'CNPJ inválido — confira os números.'),
   telefone: v => v.replace(/\D/g,'').length >= 10 ? '' : 'Informe um telefone com DDD.',
+  // o calendário já impede clicar em dia inválido; isto é a segunda barreira
   data:     v => {
-    if (!v) return 'Escolha a data da entrega.';
-    if (v < iso(new Date())) return 'A data não pode ser no passado.';
+    if (!v) return 'Escolha a data da entrega no calendário.';
+    if (v < iso(hoje0h)) return 'A data não pode ser no passado.';
     // meio-dia de propósito: new Date('2026-08-22') é meia-noite em UTC e, no
     // fuso do Brasil, cairia no dia anterior — o dia da semana sairia errado
-    const dia = new Date(v + 'T12:00:00').getDay();
-    if (!CONFIG.diasSemana.includes(dia)) return 'Não há recebimento nesse dia. Escolha de segunda a sexta.';
+    if (!diaUtil(v)) return 'Não há recebimento nesse dia. Escolha de segunda a sexta.';
+    if (diaLotado(v)) return 'Esse dia já está com todas as janelas reservadas.';
     return '';
   },
-  hora:     v => v ? '' : 'Escolha um horário.',
+  hora:     v => {
+    if (!v) return 'Escolha um horário.';
+    if (ocupadosDe(agenda.dataEscolhida).includes(v)) return 'Essa janela já foi reservada. Escolha outra.';
+    return '';
+  },
   produto:  v => v ? '' : 'Selecione o produto.',
   outro:    v => $('#outro-wrap').hidden || v.trim().length >= 2 ? '' : 'Descreva o produto.',
   paletes:  v => v === '' ? 'Informe a quantidade (use 0 se não houver).' : (Number(v) >= 0 ? '' : 'Valor inválido.'),
   volumes:  v => v === '' ? 'Informe a quantidade (use 0 se não houver).' : (Number(v) >= 0 ? '' : 'Valor inválido.')
 };
 
-/* o horário é um grupo de botões, não um campo comum: o valor vem do rádio marcado */
+/* data e horário não são campos comuns: um é o calendário, o outro um grupo
+   de botões. Os dois guardam o valor fora do DOM de um <input> normal. */
 function valorDe(id) {
+  if (id === 'data') return agenda.dataEscolhida;
   if (id === 'hora') {
     const marcado = boxHora.querySelector('input[name="hora"]:checked');
     return marcado ? marcado.value : '';
@@ -1017,6 +1248,7 @@ function valida(id) {
 
 Object.keys(REGRAS).forEach(id => {
   const el = $('#' + id);
+  if (id === 'data') return;                 // validado no clique do calendário
   if (id === 'hora') {
     el.addEventListener('change', () => valida(id));
     return;
@@ -1105,7 +1337,8 @@ form.addEventListener('submit', async (e) => {
   const p = Number(inPaletes.value) || 0;
   const v = Number(inVolumes.value) || 0;
   const produtoFinal = selProduto.value === 'Outro' ? `Outro — ${$('#outro').value.trim()}` : selProduto.value;
-  const [ano, mes, dia] = inputData.value.split('-');
+  const dataIso = agenda.dataEscolhida;
+  const [ano, mes, dia] = dataIso.split('-');
 
   const dados = {
     protocolo: gerarProtocolo(),
@@ -1113,6 +1346,7 @@ form.addEventListener('submit', async (e) => {
     cnpj: inputCnpj.value,
     telefone: inputTel.value,
     responsavel: $('#responsavel').value.trim(),
+    dataIso: dataIso,
     data: `${dia}/${mes}/${ano}`,
     hora: valorDe('hora'),
     produto: produtoFinal,
@@ -1136,6 +1370,22 @@ form.addEventListener('submit', async (e) => {
       });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const resposta = await r.json().catch(() => ({ok: true}));
+
+      // a planilha é a palavra final: alguém pode ter fechado essa mesma
+      // janela entre o momento em que a tela foi montada e o clique em enviar
+      if (resposta.ok === false && resposta.motivo === 'ocupado') {
+        agenda.ocupados[dataIso] = resposta.ocupados || ocupadosDe(dataIso).concat(dados.hora);
+        desenhaCalendario();
+        desenhaHorarios();
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Enviar agendamento';
+        resumo.textContent = 'Essa janela acabou de ser reservada por outro fornecedor. Escolha outro horário.';
+        resumo.classList.add('on');
+        setErro('hora', 'Escolha uma janela livre.');
+        boxHora.scrollIntoView({behavior: 'smooth', block: 'center'});
+        return;
+      }
+
       if (resposta.ok === false) throw new Error(resposta.erro || 'Falha no servidor');
     } catch (err) {
       btn.disabled = false;
@@ -1145,6 +1395,9 @@ form.addEventListener('submit', async (e) => {
       return;
     }
   }
+
+  // reserva confirmada: some da lista para quem estiver com a tela aberta
+  agenda.ocupados[dataIso] = ocupadosDe(dataIso).concat(dados.hora);
 
   ultimoEnvio = dados;
   mostraComprovante(dados);
@@ -1211,6 +1464,10 @@ $('#btn-new').addEventListener('click', () => {
   form.querySelectorAll('.err').forEach(el => { el.textContent = ''; el.classList.remove('on'); });
   $('#outro-wrap').hidden = true;
   $('#obs-count').textContent = '0';
+  // form.reset() não alcança o calendário: a data escolhida vive fora do DOM
+  agenda.dataEscolhida = '';
+  desenhaCalendario();
+  desenhaHorarios();
   atualizaTotal();
   $('#receipt').classList.remove('on');
   $('#mobile-bar').classList.remove('off');
