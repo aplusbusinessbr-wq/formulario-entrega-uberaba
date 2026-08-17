@@ -361,25 +361,27 @@ legend .num{
 .slots[aria-invalid=true] .slot span{border-color:var(--danger);background:#FFF7F6}
 
 /* janela já reservada por outro fornecedor: uma entrega por horário */
-.slot.ocupado{cursor:not-allowed}
-.slot.ocupado span{
+.slot.ocupado,.slot.passado{cursor:not-allowed}
+.slot.ocupado span,.slot.passado span{
   background:var(--shell);
   border-color:var(--line);
   color:#B3A99D;
   text-decoration:line-through;
   text-decoration-thickness:1.5px;
 }
-.slot.ocupado:hover span{border-color:var(--line);color:#B3A99D}
+.slot.ocupado:hover span,.slot.passado:hover span{border-color:var(--line);color:#B3A99D}
 /* o ::after vira um item do flex e desce sozinho para a linha de baixo */
-.slot.ocupado span{flex-direction:column;gap:1px;padding:9px 8px}
-.slot.ocupado span::after{
-  content:"reservado";
+.slot.ocupado span,.slot.passado span{flex-direction:column;gap:1px;padding:9px 8px}
+.slot.ocupado span::after,.slot.passado span::after{
   font-family:'Figtree',sans-serif;
   font-size:9.5px;font-weight:700;
   letter-spacing:.1em;text-transform:uppercase;
   text-decoration:none;
   color:#B3A99D;
 }
+/* motivos diferentes, rótulos diferentes: reservada por outro x já começou */
+.slot.ocupado span::after{content:"reservado"}
+.slot.passado span::after{content:"encerrado"}
 .hint{font-size:12px;color:var(--ink-soft);line-height:1.4;margin:0}
 
 input[type=text],input[type=tel],input[type=date],select,textarea{
@@ -786,7 +788,7 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
                 </div>
                 <div class="cal-grid" id="cal-grid"></div>
               </div>
-              <p class="cal-legenda">Cinza = sem recebimento (fim de semana, data passada ou dia lotado).</p>
+              <p class="cal-legenda">Cinza = sem recebimento (fim de semana, data passada ou sem janela livre).</p>
               <p class="err" id="data-err"></p>
             </div>
 
@@ -1022,10 +1024,24 @@ const hoje0h   = new Date(); hoje0h.setHours(0, 0, 0, 0);
 
 const ocupadosDe = (dataIso) => agenda.ocupados[dataIso] || [];
 const diaUtil    = (dataIso) => CONFIG.diasSemana.includes(new Date(dataIso + 'T12:00:00').getDay());
-const diaLotado  = (dataIso) => ocupadosDe(dataIso).length >= CONFIG.horarios.length;
+
+// recalculado a cada chamada: a página pode ficar aberta atravessando a meia-noite
+const hojeIso = () => iso(new Date());
+
+/* Uma janela de hoje que já começou não pode mais ser reservada. */
+function janelaPassou(dataIso, hora) {
+  if (dataIso !== hojeIso()) return false;
+  const agora = new Date();
+  const [h, m] = hora.split(':').map(Number);
+  return new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), h, m) <= agora;
+}
+
+const janelaLivre  = (dataIso, hora) => !ocupadosDe(dataIso).includes(hora) && !janelaPassou(dataIso, hora);
+const livresEm     = (dataIso) => CONFIG.horarios.filter(h => janelaLivre(dataIso, h));
+const diaLotado    = (dataIso) => livresEm(dataIso).length === 0;
 
 function diaSelecionavel(dataIso) {
-  return dataIso >= iso(hoje0h) && diaUtil(dataIso) && !diaLotado(dataIso);
+  return dataIso >= hojeIso() && diaUtil(dataIso) && !diaLotado(dataIso);
 }
 
 function desenhaCalendario() {
@@ -1047,13 +1063,14 @@ function desenhaCalendario() {
   for (let dia = 1; dia <= totalDias; dia++) {
     const dataIso = iso(new Date(ano, mes, dia));
     const ok = diaSelecionavel(dataIso);
-    const ehHoje = dataIso === iso(hoje0h);
+    const ehHoje = dataIso === hojeIso();
     const marcado = dataIso === agenda.dataEscolhida;
 
     let motivo = '';
     if (!ok) {
-      if (dataIso < iso(hoje0h)) motivo = 'data já passou';
+      if (dataIso < hojeIso()) motivo = 'data já passou';
       else if (!diaUtil(dataIso)) motivo = 'sem recebimento neste dia';
+      else if (ehHoje) motivo = 'não há mais janelas hoje';
       else motivo = 'todas as janelas reservadas';
     }
 
@@ -1073,23 +1090,29 @@ function desenhaHorarios() {
   boxHora.querySelectorAll('.slot').forEach(slot => {
     const hora = slot.dataset.hora;
     const radio = slot.querySelector('input');
-    const ocupado = !data || tomados.includes(hora);
+    const reservada = !!data && tomados.includes(hora);
+    const encerrada = !!data && !reservada && janelaPassou(data, hora);
 
-    slot.classList.toggle('ocupado', !!data && tomados.includes(hora));
-    radio.disabled = ocupado;
-    // se a janela escolhida foi reservada por outro no meio do caminho
-    if (radio.checked && ocupado) radio.checked = false;
+    slot.classList.toggle('ocupado', reservada);
+    slot.classList.toggle('passado', encerrada);
+    radio.disabled = !data || reservada || encerrada;
+    // a janela escolhida pode ter sido reservada por outro — ou ter começado —
+    // entre a escolha e o envio
+    if (radio.checked && radio.disabled) radio.checked = false;
   });
+
+  const livres = data ? livresEm(data).length : 0;
 
   if (!data) {
     aviso.textContent = 'Escolha primeiro a data.';
-  } else if (tomados.length) {
-    const livres = CONFIG.horarios.length - tomados.length;
+  } else if (livres === 0) {
+    aviso.textContent = 'Não há mais janelas disponíveis neste dia.';
+  } else if (livres === CONFIG.horarios.length) {
+    aviso.textContent = 'Todas as janelas livres neste dia.';
+  } else {
     aviso.textContent = livres === 1
       ? 'Resta 1 janela neste dia.'
       : `Restam ${livres} janelas neste dia.`;
-  } else {
-    aviso.textContent = 'Todas as janelas livres neste dia.';
   }
 }
 
@@ -1211,6 +1234,7 @@ const REGRAS = {
   hora:     v => {
     if (!v) return 'Escolha um horário.';
     if (ocupadosDe(agenda.dataEscolhida).includes(v)) return 'Essa janela já foi reservada. Escolha outra.';
+    if (janelaPassou(agenda.dataEscolhida, v)) return 'Essa janela de hoje já começou. Escolha outra.';
     return '';
   },
   produto:  v => v ? '' : 'Selecione o produto.',
@@ -1371,6 +1395,19 @@ form.addEventListener('submit', async (e) => {
         resumo.classList.add('on');
         setErro('hora', 'Escolha uma janela livre.');
         boxHora.scrollIntoView({behavior: 'smooth', block: 'center'});
+        return;
+      }
+
+      // o servidor recusou a data ou a janela (relógio do aparelho errado,
+      // página aberta desde ontem, janela que começou enquanto preenchia)
+      if (resposta.ok === false && resposta.motivo === 'invalido') {
+        desenhaCalendario();
+        desenhaHorarios();
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Enviar agendamento';
+        resumo.textContent = resposta.erro + ' Escolha outra data ou janela.';
+        resumo.classList.add('on');
+        boxCal.scrollIntoView({behavior: 'smooth', block: 'center'});
         return;
       }
 

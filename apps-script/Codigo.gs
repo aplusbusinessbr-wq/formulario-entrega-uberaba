@@ -28,7 +28,13 @@ const CONFIG = {
   aba: 'Agendamentos',
 
   // Fuso para os carimbos de data/hora
-  fuso: 'America/Sao_Paulo'
+  fuso: 'America/Sao_Paulo',
+
+  // Regras de agendamento. PRECISAM ser iguais às do formulário
+  // (bloco CONFIG do index.html) — aqui é a validação que vale, porque
+  // a tela roda no celular do fornecedor e não é confiável.
+  horarios: ['07:30', '09:30', '13:00', '15:00'],
+  diasSemana: [1, 2, 3, 4, 5]   // 0=domingo ... 6=sábado
 };
 
 /* ---------- NÃO PRECISA MEXER DAQUI PRA BAIXO ---------- */
@@ -93,6 +99,43 @@ function horariosOcupadosEm(dataIso) {
 }
 
 /**
+ * Confere se a data e a janela pedidas são aceitáveis.
+ * Devolve '' quando está tudo certo, ou a mensagem do problema.
+ *
+ * O calendário do formulário já impede tudo isto, mas ele roda no celular
+ * do fornecedor: relógio errado, página aberta desde ontem ou envio fora
+ * do formulário passariam batido sem esta conferência.
+ */
+function validarAgendamento(dataIso, hora) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dataIso || ''))) {
+    return 'Data inválida.';
+  }
+  if (CONFIG.horarios.indexOf(hora) === -1) {
+    return 'Esse horário não é uma janela de recebimento.';
+  }
+
+  const agora = new Date();
+  const hojeIso = Utilities.formatDate(agora, CONFIG.fuso, 'yyyy-MM-dd');
+
+  if (dataIso < hojeIso) {
+    return 'Essa data já passou.';
+  }
+
+  const p = dataIso.split('-');
+  const diaSemana = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0).getDay();
+  if (CONFIG.diasSemana.indexOf(diaSemana) === -1) {
+    return 'Não há recebimento nesse dia. Escolha de segunda a sexta.';
+  }
+
+  // 'HH:mm' com zero à esquerda compara certo como texto
+  if (dataIso === hojeIso && hora <= Utilities.formatDate(agora, CONFIG.fuso, 'HH:mm')) {
+    return 'Essa janela de hoje já começou.';
+  }
+
+  return '';
+}
+
+/**
  * Recebe o POST do formulário.
  * O formulário envia como text/plain de propósito: evita a requisição
  * de preflight (OPTIONS), que o Apps Script não responde e que
@@ -111,9 +154,15 @@ function doPost(e) {
 
     const d = JSON.parse(e.postData.contents);
 
+    const dataIso = d.dataIso || paraIso(d.data);
+
+    const problema = validarAgendamento(dataIso, d.hora);
+    if (problema) {
+      return responder({ ok: false, motivo: 'invalido', erro: problema });
+    }
+
     trava.waitLock(20000);
 
-    const dataIso = d.dataIso || paraIso(d.data);
     const jaOcupados = horariosOcupadosEm(dataIso);
     if (jaOcupados.indexOf(d.hora) !== -1) {
       return responder({ ok: false, motivo: 'ocupado', ocupados: jaOcupados });
