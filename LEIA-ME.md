@@ -127,10 +127,9 @@ Tudo fica no bloco `CONFIG`, no fim do arquivo:
 
 | Item | Situação |
 |---|---|
-| `endpoint` | vazio — recebe a URL do Apps Script (Parte 1) |
-| `whatsapp` | `5534000000000` é fictício — trocar pelo WhatsApp do recebimento |
-| `produtos` | lista provisória — o Jotform carrega as opções por JavaScript e não deu pra extrair as originais |
+| `endpoint` | ✅ pronto — apontando para a implantação do Apps Script |
 | `logoUrl` | ✅ pronto — usa o `logo.png` oficial |
+| `produtos` | lista provisória — o Jotform carrega as opções por JavaScript e não deu pra extrair as originais |
 | Telefone `(34) 0000-0000` | fictício, aparece no painel lateral — está no HTML, não no `CONFIG` |
 
 Taxas confirmadas: **R$ 30,00 por palete** e **R$ 1,00 por volume**
@@ -163,12 +162,29 @@ a pessoa preencher tudo.
 **Para liberar uma janela** (fornecedor desmarcou, entrega cancelada): apague a
 linha correspondente na planilha. O horário volta a aparecer como livre.
 
-### Dias sem recebimento
+### Quando dá para agendar
 
-Sábados e domingos ficam cinza no calendário, inclicáveis. A regra está em
-`CONFIG.diasSemana`, onde `0` é domingo e `6` é sábado — hoje `[1,2,3,4,5]`.
-Para fechar também um feriado específico, hoje é preciso mexer no código; se
-isso virar rotina, vale criar uma lista de datas bloqueadas.
+Três regras, todas conferidas **duas vezes** — na tela e de novo na gravação:
+
+| Regra | Onde fica |
+|---|---|
+| Só de segunda a sexta | `diasSemana` |
+| Só nas 4 janelas do dia | `horarios` |
+| Nada em data passada, nem em janela que já começou | automático |
+
+A terceira é a que menos se lembra: às 19h, as quatro janelas de hoje já
+passaram, então **o dia de hoje fica cinza no calendário**. Numa manhã, as
+janelas já vencidas aparecem riscadas como *"encerrado"* — visualmente
+diferentes de *"reservado"*, que é a janela tomada por outro fornecedor.
+
+Os valores estão em dois lugares e **precisam ser iguais**: no `CONFIG` do
+`index.html` e no `CONFIG` do `Codigo.gs`. A do script é a que vale — o
+calendário roda no celular do fornecedor, e relógio errado, página aberta
+desde ontem ou um envio fora do formulário passariam batido se a checagem
+existisse só na tela.
+
+Para fechar um feriado específico, hoje é preciso mexer no código; se isso
+virar rotina, vale criar uma lista de datas bloqueadas.
 
 ### O logo
 
