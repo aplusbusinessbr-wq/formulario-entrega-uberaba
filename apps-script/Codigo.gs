@@ -180,8 +180,9 @@ function gravarNaPlanilha(d) {
         .setFontColor('#FFFFFF');
     aba.setFrozenRows(1);
 
-    // colunas de data ISO e horário como texto puro, senão o Sheets
-    // converte os valores e a conferência de disponibilidade fica frágil
+    // Tentativa de manter data ISO e horário como texto puro. Na prática o
+    // Sheets converte assim mesmo — por isso paraIso() e paraHora() aceitam
+    // tanto texto quanto Date na leitura. Fica aqui por não custar nada.
     aba.getRange(1, COL_DATA_ISO + 1, aba.getMaxRows(), 2).setNumberFormat('@');
   }
 
@@ -341,15 +342,30 @@ function criarAbaAgenda() {
      .setFontColor('#FFFFFF');
   aba.setFrozenRows(1);
 
-  // A comparação usa a coluna ISO (texto aaaa-mm-dd), que ordena
-  // corretamente como string — a coluna dd/MM/yyyy não ordenaria.
+  // Duas armadilhas aprendidas na marra:
+  //
+  // 1. setFormula() NÃO converte o separador de argumentos para o idioma da
+  //    planilha. Numa planilha em português é preciso ";" — com "," o Sheets
+  //    devolve #ERROR!. Se um dia a planilha for recriada em inglês, troque
+  //    o SEP abaixo por ",".
+  //
+  // 2. A comparação é feita na coluna G (data), não na H (ISO): apesar da
+  //    formatação de texto, o Sheets converte "2026-08-20" em data, e a
+  //    comparação com string não casava com nada.
+  const SEP = ';';
+
   const formula =
-    '=IFERROR(QUERY(' + CONFIG.aba + '!A2:O, ' +
+    '=IFERROR(QUERY(' + CONFIG.aba + '!A2:O' + SEP + ' ' +
     '"select G, I, C, J, L, M, E, B ' +
-    'where H >= \'"&TEXT(TODAY(),"yyyy-mm-dd")&"\' ' +
-    'order by H, I", 0), "Nenhuma entrega agendada a partir de hoje.")';
+    'where G >= date \'"&TEXT(TODAY()' + SEP + '"yyyy-mm-dd")&"\' ' +
+    'order by G, I"' + SEP + ' 0)' + SEP + ' "Nenhuma entrega agendada a partir de hoje.")';
 
   aba.getRange('A2').setFormula(formula);
+
+  // o QUERY devolve data e hora como número de série: sem formato,
+  // a doca veria "46252" e "0,625" no lugar de 18/08/2026 e 15:00
+  aba.getRange('A2:A').setNumberFormat('dd/MM/yyyy');
+  aba.getRange('B2:B').setNumberFormat('HH:mm');
 
   const larguras = [110, 90, 260, 170, 90, 100, 150, 190];
   larguras.forEach(function (px, i) { aba.setColumnWidth(i + 1, px); });
