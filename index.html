@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agendamento de Entrega — Uberaba Supermercados</title>
+<meta name="description" content="Agende sua entrega no centro de recebimento do Uberaba Supermercados. Recebimento até as 14h.">
+<meta name="theme-color" content="#EB3439">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Figtree:wght@400;500;600;700;800&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   UBERABA SUPERMERCADOS — AGENDAMENTO DE ENTREGA
+   Identidade: vermelho #EB3439 / preto / off-white
+   Secundárias do site: verde-petróleo #285A5B, amarelo #FFD54D
+   ============================================================ */
+
+:root{
+  --red:#EB3439;
+  --red-700:#C6262B;
+  --red-900:#8E1A1E;
+  --red-050:#FDECEC;
+
+  --black:#151312;
+  --ink:#221E1C;
+  --ink-soft:#6E635E;
+
+  --paper:#FFFDFB;
+  --shell:#F1ECE5;
+  --line:#E6DED4;
+  --line-strong:#CFC3B5;
+
+  --yellow:#FFD54D;
+  --teal:#285A5B;
+  --teal-700:#1C4243;
+
+  --r-sm:8px;
+  --r-md:12px;
+  --r-lg:22px;
+
+  --shadow-card:0 2px 0 rgba(21,19,18,.04), 0 26px 50px -30px rgba(21,19,18,.5);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:'Figtree',system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  color:var(--ink);
+  background:var(--shell);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- layout ---------- */
+.shell{
+  display:grid;
+  grid-template-columns:minmax(0,410px) minmax(0,1fr);
+  min-height:100vh;
+  align-items:start;
+}
+
+/* ---------- painel vermelho ---------- */
+.rail{
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding:40px 42px 34px;
+  background:var(--red);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+}
+/* padrão de fundo — eco do "pattern UB" do site */
+.rail::before{
+  content:"";
+  position:absolute;
+  inset:-10%;
+  opacity:.13;
+  background-image:
+    radial-gradient(circle at center, #fff 1.6px, transparent 1.7px),
+    radial-gradient(circle at center, #fff 1.6px, transparent 1.7px);
+  background-size:34px 34px, 34px 34px;
+  background-position:0 0, 17px 17px;
+  pointer-events:none;
+}
+.rail::after{ /* brilho suave no topo */
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(90% 55% at 15% 0%, rgba(255,255,255,.16), transparent 65%);
+  pointer-events:none;
+}
+.rail > *{position:relative;z-index:1}
+
+/* marca */
+.brand{display:flex;flex-direction:column;gap:9px;align-items:flex-start}
+/* quando o logo oficial carrega, ele ganha uma placa branca —
+   o arquivo tem o selo vermelho, que sumiria sobre o painel vermelho */
+.brand.has-logo{
+  background:#fff;
+  border-radius:16px;
+  padding:14px 20px;
+  box-shadow:0 8px 22px -12px rgba(0,0,0,.45);
+}
+.brand.has-logo img{display:block;width:100%;max-width:220px;height:auto}
+.zebu{filter:drop-shadow(0 3px 0 rgba(0,0,0,.18))}
+.wordmark{
+  font-family:'Baloo 2',cursive;
+  font-weight:800;
+  font-size:46px;
+  line-height:.9;
+  letter-spacing:-.015em;
+  color:#fff;
+  text-shadow:0 3px 0 rgba(0,0,0,.14);
+}
+.brand-sub{
+  font-family:'Oswald',sans-serif;
+  font-weight:500;
+  font-size:12.5px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.9);
+  margin-left:3px;
+}
+
+.rail-head{margin-top:52px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Oswald',sans-serif;
+  font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--black);
+  background:var(--yellow);
+  border-radius:100px;
+  padding:6px 14px;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--black);animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+.rail h1{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:clamp(38px,3.4vw,52px);
+  line-height:1;
+  letter-spacing:-.02em;
+  margin:20px 0 0;
+}
+.rail h1 span{color:var(--yellow)}
+.rail p.lede{
+  color:rgba(255,255,255,.92);
+  font-size:15px;
+  max-width:33ch;
+  margin:14px 0 0;
+}
+
+.facts{list-style:none;padding:0;margin:32px 0 0;display:grid}
+.facts li{
+  display:flex;gap:16px;align-items:baseline;
+  padding:13px 0;
+  border-top:1px solid rgba(255,255,255,.25);
+  font-size:14px;
+}
+.facts li:last-child{border-bottom:1px solid rgba(255,255,255,.25)}
+.facts b{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:19px;
+  color:var(--yellow);
+  flex:none;
+  min-width:78px;
+  line-height:1.1;
+}
+.facts span{color:rgba(255,255,255,.88)}
+
+.rail-foot{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.55}
+.rail-foot a{color:#fff;font-weight:600}
+
+/* ---------- coluna do formulário ---------- */
+.main{padding:54px 5vw 90px;display:flex;justify-content:center}
+.docket{
+  width:100%;
+  max-width:720px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg) var(--r-lg) 4px 4px;
+  box-shadow:var(--shadow-card);
+  position:relative;
+}
+.docket::before{ /* fita vermelha no topo do card */
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:6px;
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  background:linear-gradient(90deg,var(--red) 0 60%,var(--yellow) 60% 82%,var(--black) 82% 100%);
+}
+.docket::after{ /* serrilha de cupom */
+  content:"";
+  position:absolute;
+  left:-1px;right:-1px;bottom:-13px;
+  height:14px;
+  background:radial-gradient(circle at 8px 0, transparent 0 8px, var(--paper) 8px) repeat-x;
+  background-size:16px 14px;
+  filter:drop-shadow(0 1px 0 var(--line));
+}
+
+.docket-head{
+  padding:32px 34px 24px;
+  border-bottom:2px dashed var(--line);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+}
+.docket-head h2{
+  font-family:'Baloo 2',cursive;
+  font-size:29px;font-weight:700;letter-spacing:-.015em;margin:0;line-height:1.1;
+}
+.docket-head p{margin:4px 0 0;color:var(--ink-soft);font-size:13.5px}
+.stamp{
+  flex:none;
+  transform:rotate(5deg);
+  border:2px solid var(--red);
+  color:var(--red);
+  border-radius:6px;
+  padding:7px 11px;
+  font-family:'Oswald',sans-serif;
+  font-size:11px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  line-height:1.3;
+  text-align:center;
+}
+
+form{padding:6px 34px 34px}
+
+[hidden]{display:none!important}
+
+fieldset{border:0;margin:28px 0 0;padding:0}
+fieldset + fieldset{margin-top:36px}
+legend{
+  display:flex;align-items:center;gap:11px;
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--black);
+  padding:0;
+}
+legend .num{
+  width:24px;height:24px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:var(--black);
+  color:var(--yellow);
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:0;
+  padding-top:1px;
+}
+
+.grid{display:grid;gap:16px;margin-top:16px}
+@media(min-width:640px){
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.split{grid-template-columns:1.35fr 1fr}
+}
+
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:13.5px;font-weight:600}
+.req{color:var(--red);font-weight:700}
+.hint{font-size:12px;color:var(--ink-soft);line-height:1.4;margin:0}
+
+input[type=text],input[type=tel],input[type=date],select,textarea{
+  font-family:'Figtree',sans-serif;
+  /* 16px é obrigatório: abaixo disso o Safari do iPhone dá zoom
+     automático ao focar o campo e desalinha a página inteira */
+  font-size:16px;
+  color:var(--ink);
+  width:100%;
+  padding:12px 14px;
+  background:#fff;
+  border:1.5px solid var(--line-strong);
+  border-radius:var(--r-md);
+  transition:border-color .18s var(--ease), box-shadow .18s var(--ease), background .18s;
+  appearance:none;
+}
+textarea{min-height:104px;resize:vertical;line-height:1.5}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23151312' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:40px;
+  cursor:pointer;
+}
+input::placeholder,textarea::placeholder{color:#A99E93}
+input:hover,select:hover,textarea:hover{border-color:#B3A697}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--teal);
+  box-shadow:0 0 0 4px rgba(40,90,91,.16);
+}
+input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{
+  border-color:var(--red);
+  background:var(--red-050);
+}
+input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 4px rgba(235,52,57,.18)}
+
+.err{
+  font-size:12.5px;font-weight:700;color:var(--red-900);
+  margin:0;display:none;align-items:center;gap:6px;
+}
+.err.on{display:flex;animation:shake .3s var(--ease)}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+.with-tag{position:relative}
+.with-tag input{padding-right:106px}
+.with-tag .tag{
+  position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  font-family:'Oswald',sans-serif;
+  font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--red-900);
+  background:var(--red-050);
+  border:1px solid #F6D3D4;
+  border-radius:6px;
+  padding:4px 8px;
+  pointer-events:none;
+}
+
+.notice{
+  display:flex;gap:11px;
+  margin-top:16px;
+  padding:13px 15px;
+  background:#FFF7DF;
+  border:1px solid #F2DFA0;
+  border-left:4px solid var(--yellow);
+  border-radius:var(--r-sm);
+  font-size:13px;color:#6B531A;line-height:1.45;
+}
+.notice svg{flex:none;margin-top:1px}
+
+/* totalizador — cara de etiqueta de preço */
+.total{
+  margin-top:18px;
+  border:2px solid var(--black);
+  border-radius:var(--r-md);
+  background:#fff;
+  padding:16px 18px;
+}
+.total-row{
+  display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  font-size:13.5px;color:var(--ink-soft);padding:3px 0;
+}
+.total-row.grand{
+  margin-top:9px;padding-top:11px;
+  border-top:2px dashed var(--line-strong);
+  color:var(--ink);
+}
+.total-row.grand span:first-child{
+  font-family:'Oswald',sans-serif;
+  font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;
+}
+.total-row.grand b{
+  font-family:'Baloo 2',cursive;
+  font-size:33px;font-weight:800;letter-spacing:-.02em;color:var(--red);line-height:1;
+}
+.total small{display:block;margin-top:9px;font-size:11.5px;color:var(--ink-soft)}
+
+/* checkbox */
+.check{
+  display:flex;gap:12px;align-items:flex-start;
+  margin-top:22px;padding:14px 16px;
+  border:1.5px solid var(--line-strong);
+  border-radius:var(--r-md);
+  background:#fff;cursor:pointer;
+  transition:border-color .18s,background .18s;
+}
+.check:hover{border-color:#B3A697}
+.check input{
+  appearance:none;
+  width:21px;height:21px;flex:none;margin:1px 0 0;
+  border:2px solid var(--line-strong);
+  border-radius:6px;cursor:pointer;
+  transition:.18s var(--ease);
+}
+.check input:checked{
+  background:var(--teal) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='10' viewBox='0 0 13 10'%3E%3Cpath d='M1 5l3.6 3.6L12 1.2' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/13px no-repeat;
+  border-color:var(--teal);
+}
+.check input:focus-visible{box-shadow:0 0 0 4px rgba(40,90,91,.22)}
+.check input[aria-invalid=true]{border-color:var(--red)}
+.check span{font-size:13.5px;line-height:1.45}
+
+/* botão */
+.actions{margin-top:26px}
+.btn{
+  font-family:'Figtree',sans-serif;
+  font-weight:800;font-size:16px;letter-spacing:.01em;
+  width:100%;padding:17px 24px;
+  border:0;border-radius:var(--r-md);
+  color:#fff;background:var(--black);
+  box-shadow:0 5px 0 var(--red-700);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s var(--ease), box-shadow .12s var(--ease), background .2s;
+}
+.btn:hover{background:var(--red);box-shadow:0 5px 0 var(--red-900)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--red-900)}
+.btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.btn,.check,input,select,textarea{-webkit-tap-highlight-color:rgba(40,90,91,.12)}
+.btn{touch-action:manipulation}
+.btn[disabled]{opacity:.6;cursor:progress}
+.btn.ghost{
+  background:transparent;color:var(--black);
+  border:1.5px solid var(--line-strong);box-shadow:none;font-weight:700;
+}
+.btn.ghost:hover{background:var(--shell);border-color:var(--black);color:var(--black)}
+.btn.ghost:active{transform:none}
+.btn.wa{background:var(--teal);box-shadow:0 5px 0 var(--teal-700)}
+.btn.wa:hover{background:#31706F;box-shadow:0 5px 0 var(--teal-700)}
+
+.form-foot{margin-top:14px;text-align:center;font-size:12px;color:var(--ink-soft)}
+
+.summary-err{
+  display:none;margin-top:20px;padding:13px 16px;
+  border-radius:var(--r-sm);
+  background:var(--red-050);
+  border:1px solid #F3C6C7;
+  color:var(--red-900);
+  font-size:13.5px;font-weight:700;
+}
+.summary-err.on{display:block}
+
+/* ---------- comprovante ---------- */
+.receipt{display:none;padding:34px}
+.receipt.on{display:block;animation:rise .5s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.receipt-top{text-align:center;padding-bottom:22px;border-bottom:2px dashed var(--line)}
+.tick{
+  width:66px;height:66px;margin:0 auto 16px;
+  border-radius:50%;background:var(--teal);
+  display:grid;place-items:center;
+  animation:pop .45s .1s var(--ease) both;
+}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.receipt-top h2{font-family:'Baloo 2',cursive;font-size:31px;font-weight:700;margin:0;letter-spacing:-.015em}
+.receipt-top p{margin:6px 0 0;color:var(--ink-soft);font-size:14px}
+.protocol{
+  margin-top:18px;display:inline-block;
+  font-family:ui-monospace,'SFMono-Regular',Menlo,monospace;
+  font-size:17px;letter-spacing:.06em;
+  background:var(--black);color:var(--yellow);
+  padding:10px 17px;border-radius:var(--r-sm);
+}
+.receipt dl{margin:22px 0 0;display:grid}
+.receipt dl > div{
+  display:flex;justify-content:space-between;gap:20px;
+  padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px;
+}
+.receipt dt{color:var(--ink-soft);flex:none}
+.receipt dd{margin:0;text-align:right;font-weight:600;word-break:break-word}
+.receipt dl > div.big dd{font-family:'Baloo 2',cursive;font-size:23px;font-weight:700;color:var(--red)}
+.receipt-actions{display:grid;gap:10px;margin-top:26px}
+
+/* ---------- barra fixa do celular ---------- */
+.mobile-bar{display:none}
+
+/* ---------- responsivo ---------- */
+@media(max-width:1000px){
+  .shell{grid-template-columns:1fr}
+
+  /* o painel vira um cabeçalho compacto: no celular ele é só a antessala
+     do formulário, não pode custar uma tela inteira de rolagem */
+  .rail{position:static;height:auto;padding:22px 6vw 24px}
+  .rail-head{margin-top:22px}
+  .rail h1{font-size:clamp(30px,7.5vw,40px);margin-top:14px}
+  .rail p.lede{margin-top:10px;font-size:14px}
+  .wordmark{font-size:38px}
+  .brand.has-logo{padding:11px 15px}
+  .brand.has-logo img{max-width:170px}
+
+  /* as 4 regras viram cartões 2×2 em vez de lista longa */
+  .facts{grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+  .facts li{
+    flex-direction:column;gap:1px;align-items:flex-start;
+    border:1px solid rgba(255,255,255,.3);
+    border-radius:11px;
+    padding:9px 11px;
+    font-size:12px;line-height:1.3;
+  }
+  .facts li:last-child{border-bottom:1px solid rgba(255,255,255,.3)}
+  .facts b{font-size:16px;min-width:0}
+  .rail-foot{margin-top:20px;font-size:11.5px}
+
+  .main{padding:24px 4vw 104px}
+
+  /* total e envio sempre à mão, sem precisar rolar até o fim */
+  .mobile-bar{
+    display:flex;align-items:center;gap:14px;
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(255,253,251,.96);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    border-top:1px solid var(--line-strong);
+    box-shadow:0 -10px 30px -20px rgba(21,19,18,.7);
+  }
+  .mobile-bar.off{display:none}
+  .mobile-bar .mb-info{flex:1;min-width:0}
+  .mobile-bar .mb-label{
+    font-family:'Oswald',sans-serif;
+    font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .mobile-bar b{
+    font-family:'Baloo 2',cursive;font-weight:700;
+    font-size:23px;color:var(--red);display:block;line-height:1.1;
+  }
+  .mobile-bar .btn{width:auto;flex:none;padding:14px 22px;font-size:15px;box-shadow:0 4px 0 var(--red-700)}
+  .mobile-bar .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-900)}
+}
+
+@media(max-width:560px){
+  /* no celular o texto de apoio só empurra o formulário para baixo —
+     o título e o cabeçalho do card já dizem do que se trata */
+  .rail p.lede{display:none}
+  .rail-head{margin-top:18px}
+  .rail h1{font-size:clamp(28px,7.5vw,36px);margin-top:12px}
+
+  .docket-head,form,.receipt{padding-left:18px;padding-right:18px}
+  .stamp{display:none}
+  .docket{border-radius:var(--r-md) var(--r-md) 4px 4px}
+  .docket::before{border-radius:var(--r-md) var(--r-md) 0 0}
+  .docket-head h2{font-size:25px}
+
+  /* área de toque maior nos alvos pequenos */
+  .check{padding:15px 16px}
+  .check input{width:24px;height:24px}
+  .total-row.grand b{font-size:29px}
+
+  /* etiqueta de preço abaixo do campo: em tela estreita ela roubava
+     espaço demais de dentro do input */
+  .with-tag input{padding-right:14px}
+  .with-tag .tag{
+    position:static;transform:none;display:inline-block;
+    margin-top:6px;background:transparent;border:0;padding:0;
+    color:var(--ink-soft);
+  }
+}
+
+@media(max-width:340px){
+  .facts{grid-template-columns:1fr}
+  .mobile-bar .btn{padding:14px 16px;font-size:14px}
+}
+
+@media print{
+  body{background:#fff}
+  .rail,.form-foot,.receipt-actions{display:none!important}
+  .shell{display:block}
+  .main{padding:0}
+  .docket{border:0;box-shadow:none;max-width:100%}
+  .docket::after{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.reveal{animation:fadeUp .6s var(--ease) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============ PAINEL ============ -->
+  <aside class="rail">
+    <div>
+      <div class="brand" id="brand">
+        <!-- Fallback: usado enquanto o arquivo oficial do logo não estiver na pasta.
+             Assim que logo.png (ou CONFIG.logoUrl) existir, ele substitui isto. -->
+        <div id="brand-fallback">
+          <svg class="zebu" width="54" height="46" viewBox="0 0 100 86" aria-hidden="true">
+            <g fill="#151312">
+              <!-- testa e face -->
+              <path fill-rule="evenodd" d="M30 0h40a18 18 0 0 1 0 36h-4L50 78 34 36h-4A18 18 0 0 1 30 0Zm20 12 12 20-12 34-12-34 12-20ZM26 9h12l-6 14-6-14Zm36 0h12l-6 14-6-14Z"/>
+              <!-- chifres -->
+              <path d="M33 34c-9 8-14 20-9 30 1.6 3-1.6 5.6-4 3-8-11-6-25 6-35l7 2Z"/>
+              <path d="M67 34c9 8 14 20 9 30-1.6 3 1.6 5.6 4 3 8-11 6-25-6-35l-7 2Z"/>
+            </g>
+          </svg>
+          <div class="wordmark">Uberaba</div>
+          <div class="brand-sub">Supermercados</div>
+        </div>
+      </div>
+
+      <div class="rail-head">
+        <span class="eyebrow"><i class="dot"></i> Agenda aberta</span>
+        <h1>Agende sua <span>entrega</span></h1>
+        <p class="lede">Preencha o formulário para reservar sua janela na doca do centro de recebimento.</p>
+      </div>
+
+      <ul class="facts">
+        <li><b>até 14h</b><span>Horário limite de recebimento</span></li>
+        <li><b>R$ 30</b><span>Por palete descarregado</span></li>
+        <li><b>R$ 1</b><span>Por volume descarregado</span></li>
+        <li><b>NF</b><span>Quantidades conforme a nota</span></li>
+      </ul>
+    </div>
+
+    <p class="rail-foot">
+      Precisa remarcar? Envie o formulário novamente com a nova data.<br>
+      Dúvidas: <a href="tel:+553400000000">(34) 0000-0000</a> &nbsp;·&nbsp;
+      <a href="https://www.uberabasupermercados.com.br/" target="_blank" rel="noopener">uberabasupermercados.com.br</a>
+    </p>
+  </aside>
+
+  <!-- ============ FORMULÁRIO ============ -->
+  <main class="main">
+    <div class="docket reveal">
+
+      <div class="docket-head" id="topo">
+        <div>
+          <h2>Formulário de Entrega</h2>
+          <p>Leva menos de 2 minutos. Campos com <span class="req">*</span> são obrigatórios.</p>
+        </div>
+        <div class="stamp" aria-hidden="true">Recebimento<br>até 14:00</div>
+      </div>
+
+      <form id="form" novalidate>
+
+        <!-- 1. FORNECEDOR -->
+        <fieldset>
+          <legend><span class="num">1</span> Fornecedor</legend>
+
+          <div class="grid split">
+            <div class="field">
+              <label for="empresa">Nome da empresa <span class="req">*</span></label>
+              <input type="text" id="empresa" name="empresa" autocomplete="organization" placeholder="Razão social ou nome fantasia" aria-describedby="empresa-err">
+              <p class="err" id="empresa-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="cnpj">CNPJ <span class="req">*</span></label>
+              <input type="text" id="cnpj" name="cnpj" inputmode="numeric" placeholder="00.000.000/0000-00" maxlength="18" aria-describedby="cnpj-err">
+              <p class="err" id="cnpj-err"></p>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="telefone">Telefone / WhatsApp <span class="req">*</span></label>
+              <input type="tel" id="telefone" name="telefone" inputmode="numeric" placeholder="(34) 90000-0000" maxlength="16" autocomplete="tel" aria-describedby="telefone-err">
+              <p class="err" id="telefone-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="responsavel">Responsável pela entrega</label>
+              <input type="text" id="responsavel" name="responsavel" autocomplete="name" placeholder="Quem devemos procurar (opcional)">
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- 2. AGENDAMENTO -->
+        <fieldset>
+          <legend><span class="num">2</span> Data e horário</legend>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="data">Data da entrega <span class="req">*</span></label>
+              <input type="date" id="data" name="data" aria-describedby="data-err">
+              <p class="err" id="data-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="hora">Horário <span class="req">*</span></label>
+              <select id="hora" name="hora" aria-describedby="hora-err">
+                <option value="">Selecione um horário</option>
+              </select>
+              <p class="hint">Recebimento das 06:00 às 14:00.</p>
+              <p class="err" id="hora-err"></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- 3. CARGA -->
+        <fieldset>
+          <legend><span class="num">3</span> Carga</legend>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="produto">Qual produto será entregue? <span class="req">*</span></label>
+              <select id="produto" name="produto" aria-describedby="produto-err"></select>
+              <p class="err" id="produto-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="nf">Número da nota fiscal</label>
+              <input type="text" id="nf" name="nf" inputmode="numeric" placeholder="Opcional, agiliza a conferência">
+            </div>
+          </div>
+
+          <div class="field" id="outro-wrap" hidden style="margin-top:16px">
+            <label for="outro">Descreva o produto <span class="req">*</span></label>
+            <input type="text" id="outro" name="outro" placeholder="Ex.: material de embalagem" aria-describedby="outro-err">
+            <p class="err" id="outro-err"></p>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="paletes">Quantidade de paletes <span class="req">*</span></label>
+              <div class="with-tag">
+                <input type="text" id="paletes" name="paletes" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="0" aria-describedby="paletes-err">
+                <span class="tag">R$ 30 cada</span>
+              </div>
+              <p class="err" id="paletes-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="volumes">Quantidade de volumes <span class="req">*</span></label>
+              <div class="with-tag">
+                <input type="text" id="volumes" name="volumes" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="0" aria-describedby="volumes-err">
+                <span class="tag">R$ 1 cada</span>
+              </div>
+              <p class="err" id="volumes-err"></p>
+            </div>
+          </div>
+
+          <div class="notice">
+            <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="8.4" stroke="#B8860B" stroke-width="1.6"/>
+              <path d="M10 5.6v5M10 13.8v.6" stroke="#B8860B" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span><b>Confira antes de enviar.</b> As quantidades precisam ser exatamente as da nota fiscal — divergência impede o recebimento da carga na doca.</span>
+          </div>
+
+          <div class="total" aria-live="polite">
+            <div class="total-row"><span id="lbl-paletes">Paletes — 0 × R$ 30,00</span><span id="val-paletes">R$ 0,00</span></div>
+            <div class="total-row"><span id="lbl-volumes">Volumes — 0 × R$ 1,00</span><span id="val-volumes">R$ 0,00</span></div>
+            <div class="total-row grand"><span>Total estimado</span><b id="val-total">R$ 0,00</b></div>
+            <small>Valor de referência da taxa de descarga, sujeito à conferência no recebimento.</small>
+          </div>
+        </fieldset>
+
+        <!-- 4. OBSERVAÇÃO -->
+        <fieldset>
+          <legend><span class="num">4</span> Observação</legend>
+          <div class="field" style="margin-top:16px">
+            <label for="obs">Alguma informação extra?</label>
+            <textarea id="obs" name="obs" maxlength="600" placeholder="Ex.: carga refrigerada, caminhão truck, precisa de empilhadeira..."></textarea>
+            <p class="hint"><span id="obs-count">0</span>/600 caracteres. Para reagendar, é só enviar o formulário novamente.</p>
+          </div>
+
+          <label class="check" for="confirmo">
+            <input type="checkbox" id="confirmo" name="confirmo" aria-describedby="confirmo-err">
+            <span>Confirmo que os dados acima conferem com a nota fiscal e que a entrega chegará até as 14:00.</span>
+          </label>
+          <p class="err" id="confirmo-err" style="margin-top:8px"></p>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="btn" id="submit">
+            <span>Enviar agendamento</span>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M4 10h11M10.5 5.5L15 10l-4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <p class="summary-err" id="summary-err" role="alert"></p>
+          <p class="form-foot">Seus dados são usados apenas para organizar o recebimento.</p>
+        </div>
+      </form>
+
+      <!-- ============ COMPROVANTE ============ -->
+      <div class="receipt" id="receipt" tabindex="-1">
+        <div class="receipt-top">
+          <div class="tick" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+              <path d="M8 15.5l5 5L22 10" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2>Agendamento enviado!</h2>
+          <p>Guarde o protocolo abaixo e apresente na portaria no dia da entrega.</p>
+          <div class="protocol" id="protocol">—</div>
+        </div>
+
+        <dl id="receipt-data"></dl>
+
+        <div class="receipt-actions">
+          <button type="button" class="btn wa" id="btn-wa">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm5.8 14.16c-.24.68-1.42 1.3-1.95 1.34-.5.05-.98.23-3.3-.69-2.78-1.1-4.53-3.95-4.67-4.14-.13-.19-1.11-1.48-1.11-2.82 0-1.34.7-2 .95-2.27.24-.27.53-.34.71-.34l.5.01c.16 0 .38-.06.59.45.24.57.8 1.98.87 2.12.07.14.12.3.02.49-.1.19-.15.3-.29.47l-.44.5c-.14.14-.29.3-.13.58.17.29.74 1.22 1.59 1.98 1.09.97 2.01 1.28 2.3 1.42.29.14.46.12.63-.07.17-.19.72-.85.92-1.14.19-.29.39-.24.65-.14.26.09 1.67.79 1.96.93.29.14.48.21.55.33.07.12.07.7-.17 1.38Z"/>
+            </svg>
+            Enviar cópia no WhatsApp
+          </button>
+          <button type="button" class="btn ghost" id="btn-print">Imprimir comprovante</button>
+          <button type="button" class="btn ghost" id="btn-new">Fazer novo agendamento</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- barra fixa do celular: total sempre visível + atalho de envio -->
+<div class="mobile-bar" id="mobile-bar">
+  <div class="mb-info">
+    <div class="mb-label">Total estimado</div>
+    <b id="bar-total">R$ 0,00</b>
+  </div>
+  <button type="button" class="btn" id="bar-submit">Enviar</button>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIGURAÇÃO — edite apenas este bloco
+   ========================================================================= */
+const CONFIG = {
+  // Logo oficial. Basta salvar o arquivo como "logo.png" na mesma pasta do
+  // index.html que ele aparece sozinho — não precisa mexer aqui.
+  // Se o arquivo tiver outro nome ou estiver noutra pasta, informe o caminho.
+  // Se o arquivo não existir, o formulário cai na versão desenhada em SVG.
+  logoUrl: "logo.png",
+
+  // URL do app da web do Google Apps Script (ver LEIA-ME.md).
+  // Vazio = o formulário só gera o comprovante na tela, sem enviar nada.
+  // Deve terminar em /exec  — ex.: https://script.google.com/macros/s/AKfy.../exec
+  endpoint: "",
+
+  // WhatsApp do recebimento (DDI + DDD + número, só dígitos)
+  whatsapp: "5534000000000",
+
+  // Taxas
+  precoPalete: 30,
+  precoVolume: 1,
+
+  // Janela de recebimento
+  horaInicio: 6,
+  horaFim: 14,
+  intervaloMin: 30,
+
+  // Opções do campo "Qual produto será entregue?"
+  produtos: [
+    "Hortifrúti",
+    "Açougue / Carnes",
+    "Frios e Laticínios",
+    "Congelados",
+    "Padaria / Confeitaria",
+    "Mercearia / Secos",
+    "Bebidas",
+    "Limpeza e Higiene",
+    "Bazar / Utilidades",
+    "Outro"
+  ]
+};
+
+/* =========================================================================
+   SETUP
+   ========================================================================= */
+const $  = (s) => document.querySelector(s);
+const brl = (n) => n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+
+const form = $('#form');
+
+// logo oficial: tenta carregar o arquivo; se não existir, mantém o desenho SVG
+if (CONFIG.logoUrl) {
+  const logo = new Image();
+  logo.onload = () => {
+    const brand = $('#brand');
+    brand.classList.add('has-logo');
+    brand.innerHTML = '';
+    logo.alt = 'Uberaba Supermercados';
+    brand.appendChild(logo);
+  };
+  logo.src = CONFIG.logoUrl;
+}
+
+// popula produtos
+const selProduto = $('#produto');
+selProduto.innerHTML = '<option value="">Selecione o produto</option>' +
+  CONFIG.produtos.map(p => `<option value="${p}">${p}</option>`).join('');
+
+// popula horários
+const selHora = $('#hora');
+for (let m = CONFIG.horaInicio * 60; m <= CONFIG.horaFim * 60; m += CONFIG.intervaloMin) {
+  const h = String(Math.floor(m / 60)).padStart(2, '0');
+  const min = String(m % 60).padStart(2, '0');
+  selHora.insertAdjacentHTML('beforeend', `<option value="${h}:${min}">${h}:${min}</option>`);
+}
+
+// data mínima = hoje
+const inputData = $('#data');
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+inputData.min = iso(new Date());
+
+/* =========================================================================
+   MÁSCARAS
+   ========================================================================= */
+const inputCnpj = $('#cnpj');
+inputCnpj.addEventListener('input', e => {
+  let v = e.target.value.replace(/\D/g, '').slice(0, 14);
+  v = v.replace(/^(\d{2})(\d)/, '$1.$2')
+       .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+       .replace(/\.(\d{3})(\d)/, '.$1/$2')
+       .replace(/(\d{4})(\d)/, '$1-$2');
+  e.target.value = v;
+});
+
+const inputTel = $('#telefone');
+inputTel.addEventListener('input', e => {
+  let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 10)      v = v.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+  else if (v.length > 6)  v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+  else if (v.length > 2)  v = v.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
+  else if (v.length > 0)  v = v.replace(/^(\d{0,2}).*/, '($1');
+  e.target.value = v;
+});
+
+/* =========================================================================
+   VALIDAÇÃO
+   ========================================================================= */
+function validaCNPJ(str) {
+  const c = str.replace(/\D/g, '');
+  if (c.length !== 14 || /^(\d)\1{13}$/.test(c)) return false;
+  const calc = (base) => {
+    let peso = base.length - 7, soma = 0;
+    for (let i = 0; i < base.length; i++) {
+      soma += Number(base[i]) * peso--;
+      if (peso < 2) peso = 9;
+    }
+    const r = soma % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return calc(c.slice(0, 12)) === Number(c[12]) && calc(c.slice(0, 13)) === Number(c[13]);
+}
+
+function setErro(id, msg) {
+  const campo = $('#' + id);
+  const box = $('#' + id + '-err');
+  if (msg) {
+    campo.setAttribute('aria-invalid', 'true');
+    box.textContent = msg;
+    box.classList.add('on');
+  } else {
+    campo.removeAttribute('aria-invalid');
+    box.textContent = '';
+    box.classList.remove('on');
+  }
+  return !msg;
+}
+
+const REGRAS = {
+  empresa:  v => v.trim().length >= 2 ? '' : 'Informe o nome da empresa.',
+  cnpj:     v => !v.trim() ? 'Informe o CNPJ.' : (validaCNPJ(v) ? '' : 'CNPJ inválido — confira os números.'),
+  telefone: v => v.replace(/\D/g,'').length >= 10 ? '' : 'Informe um telefone com DDD.',
+  data:     v => !v ? 'Escolha a data da entrega.' : (v < iso(new Date()) ? 'A data não pode ser no passado.' : ''),
+  hora:     v => v ? '' : 'Escolha um horário.',
+  produto:  v => v ? '' : 'Selecione o produto.',
+  outro:    v => $('#outro-wrap').hidden || v.trim().length >= 2 ? '' : 'Descreva o produto.',
+  paletes:  v => v === '' ? 'Informe a quantidade (use 0 se não houver).' : (Number(v) >= 0 ? '' : 'Valor inválido.'),
+  volumes:  v => v === '' ? 'Informe a quantidade (use 0 se não houver).' : (Number(v) >= 0 ? '' : 'Valor inválido.')
+};
+
+function valida(id) {
+  return setErro(id, REGRAS[id]($('#' + id).value));
+}
+
+Object.keys(REGRAS).forEach(id => {
+  const el = $('#' + id);
+  el.addEventListener('blur', () => valida(id));
+  el.addEventListener('input', () => { if (el.getAttribute('aria-invalid')) valida(id); });
+});
+
+/* produto "Outro" -> campo condicional */
+selProduto.addEventListener('change', () => {
+  const outro = selProduto.value === 'Outro';
+  $('#outro-wrap').hidden = !outro;
+  if (outro) $('#outro').focus(); else setErro('outro', '');
+});
+
+/* =========================================================================
+   TOTAL AO VIVO
+   ========================================================================= */
+const inPaletes = $('#paletes'), inVolumes = $('#volumes');
+function atualizaTotal() {
+  const p = Math.max(0, Number(inPaletes.value) || 0);
+  const v = Math.max(0, Number(inVolumes.value) || 0);
+  const tp = p * CONFIG.precoPalete, tv = v * CONFIG.precoVolume;
+  $('#lbl-paletes').textContent = `Paletes — ${p} × ${brl(CONFIG.precoPalete)}`;
+  $('#lbl-volumes').textContent = `Volumes — ${v} × ${brl(CONFIG.precoVolume)}`;
+  $('#val-paletes').textContent = brl(tp);
+  $('#val-volumes').textContent = brl(tv);
+  $('#val-total').textContent   = brl(tp + tv);
+  $('#bar-total').textContent   = brl(tp + tv);
+}
+[inPaletes, inVolumes].forEach(el => el.addEventListener('input', () => {
+  // os campos são text + inputmode numérico: no celular abrem o teclado
+  // numérico sem os problemas do type=number (setas, roda do mouse, "e")
+  const limpo = el.value.replace(/\D/g, '');
+  if (el.value !== limpo) el.value = limpo;
+  atualizaTotal();
+}));
+atualizaTotal();
+
+/* atalho de envio da barra fixa */
+$('#bar-submit').addEventListener('click', () => {
+  if (form.requestSubmit) form.requestSubmit();
+  else form.dispatchEvent(new Event('submit', {cancelable: true}));
+});
+
+/* contador da observação */
+const obs = $('#obs');
+obs.addEventListener('input', () => $('#obs-count').textContent = obs.value.length);
+
+/* =========================================================================
+   ENVIO
+   ========================================================================= */
+let ultimoEnvio = null;
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const ids = Object.keys(REGRAS).filter(id => id !== 'outro' || !$('#outro-wrap').hidden);
+  let ok = ids.map(valida).every(Boolean);
+
+  const chk = $('#confirmo');
+  if (!chk.checked) {
+    chk.setAttribute('aria-invalid', 'true');
+    $('#confirmo-err').textContent = 'Marque a confirmação para enviar.';
+    $('#confirmo-err').classList.add('on');
+    ok = false;
+  } else {
+    chk.removeAttribute('aria-invalid');
+    $('#confirmo-err').classList.remove('on');
+  }
+
+  const resumo = $('#summary-err');
+  if (!ok) {
+    resumo.textContent = 'Confira os campos destacados acima antes de enviar.';
+    resumo.classList.add('on');
+    const primeiro = form.querySelector('[aria-invalid="true"]');
+    if (primeiro) { primeiro.focus({preventScroll:true}); primeiro.scrollIntoView({behavior:'smooth', block:'center'}); }
+    return;
+  }
+  resumo.classList.remove('on');
+
+  const btn = $('#submit');
+  btn.disabled = true;
+  btn.querySelector('span').textContent = 'Enviando...';
+
+  const p = Number(inPaletes.value) || 0;
+  const v = Number(inVolumes.value) || 0;
+  const produtoFinal = selProduto.value === 'Outro' ? `Outro — ${$('#outro').value.trim()}` : selProduto.value;
+  const [ano, mes, dia] = inputData.value.split('-');
+
+  const dados = {
+    protocolo: gerarProtocolo(),
+    empresa: $('#empresa').value.trim(),
+    cnpj: inputCnpj.value,
+    telefone: inputTel.value,
+    responsavel: $('#responsavel').value.trim(),
+    data: `${dia}/${mes}/${ano}`,
+    hora: selHora.value,
+    produto: produtoFinal,
+    nf: $('#nf').value.trim(),
+    paletes: p,
+    volumes: v,
+    total: p * CONFIG.precoPalete + v * CONFIG.precoVolume,
+    observacao: obs.value.trim(),
+    enviadoEm: new Date().toLocaleString('pt-BR')
+  };
+
+  if (CONFIG.endpoint) {
+    try {
+      // text/plain de propósito: com application/json o navegador dispara uma
+      // requisição de preflight (OPTIONS) que o Apps Script não responde,
+      // e o envio seria bloqueado por CORS. O script lê o corpo como JSON.
+      const r = await fetch(CONFIG.endpoint, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(dados)
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const resposta = await r.json().catch(() => ({ok: true}));
+      if (resposta.ok === false) throw new Error(resposta.erro || 'Falha no servidor');
+    } catch (err) {
+      btn.disabled = false;
+      btn.querySelector('span').textContent = 'Enviar agendamento';
+      resumo.textContent = 'Não foi possível enviar agora. Verifique a conexão e tente novamente.';
+      resumo.classList.add('on');
+      return;
+    }
+  }
+
+  ultimoEnvio = dados;
+  mostraComprovante(dados);
+});
+
+function gerarProtocolo() {
+  const rnd = String(Math.floor(Math.random() * 9000) + 1000);
+  return `UBE-${iso(new Date()).replace(/-/g,'')}-${rnd}`;
+}
+
+function mostraComprovante(d) {
+  const linhas = [
+    ['Empresa', d.empresa],
+    ['CNPJ', d.cnpj],
+    ['Telefone', d.telefone],
+    d.responsavel ? ['Responsável', d.responsavel] : null,
+    ['Entrega', `${d.data} às ${d.hora}`],
+    ['Produto', d.produto],
+    d.nf ? ['Nota fiscal', d.nf] : null,
+    ['Paletes', String(d.paletes)],
+    ['Volumes', String(d.volumes)],
+    d.observacao ? ['Observação', d.observacao] : null
+  ].filter(Boolean);
+
+  const esc = (s) => String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+  $('#receipt-data').innerHTML =
+    linhas.map(([k, val]) => `<div><dt>${k}</dt><dd>${esc(val)}</dd></div>`).join('') +
+    `<div class="big"><dt>Total estimado</dt><dd>${brl(d.total)}</dd></div>`;
+
+  $('#protocol').textContent = d.protocolo;
+  form.style.display = 'none';
+  $('.docket-head').style.display = 'none';
+  $('#mobile-bar').classList.add('off');
+  $('#receipt').classList.add('on');
+  $('#receipt').focus();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+/* ações do comprovante */
+$('#btn-wa').addEventListener('click', () => {
+  const d = ultimoEnvio;
+  if (!d) return;
+  const txt =
+`*Agendamento de Entrega — Uberaba Supermercados*
+Protocolo: ${d.protocolo}
+
+Empresa: ${d.empresa}
+CNPJ: ${d.cnpj}
+Telefone: ${d.telefone}${d.responsavel ? `\nResponsável: ${d.responsavel}` : ''}
+Entrega: ${d.data} às ${d.hora}
+Produto: ${d.produto}${d.nf ? `\nNota fiscal: ${d.nf}` : ''}
+Paletes: ${d.paletes}
+Volumes: ${d.volumes}
+Total estimado: ${brl(d.total)}${d.observacao ? `\n\nObs.: ${d.observacao}` : ''}`;
+  window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+});
+
+$('#btn-print').addEventListener('click', () => window.print());
+
+$('#btn-new').addEventListener('click', () => {
+  form.reset();
+  form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+  form.querySelectorAll('.err').forEach(el => { el.textContent = ''; el.classList.remove('on'); });
+  $('#outro-wrap').hidden = true;
+  $('#obs-count').textContent = '0';
+  atualizaTotal();
+  $('#receipt').classList.remove('on');
+  $('#mobile-bar').classList.remove('off');
+  form.style.display = '';
+  $('.docket-head').style.display = '';
+  $('#empresa').focus();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
+</script>
+</body>
+</html>

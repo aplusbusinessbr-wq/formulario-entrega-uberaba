@@ -1,0 +1,14 @@
+# valores reais (e-mails, telefones) — repositório é público
+CONFIG-PRIVADO.md
+
+# Vercel
+.vercel
+
+# sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# editores
+.vscode/
+.idea/
