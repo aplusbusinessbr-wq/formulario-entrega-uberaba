@@ -130,7 +130,7 @@ Tudo fica no bloco `CONFIG`, no fim do arquivo:
 | `endpoint` | vazio — recebe a URL do Apps Script (Parte 1) |
 | `whatsapp` | `5534000000000` é fictício — trocar pelo WhatsApp do recebimento |
 | `produtos` | lista provisória — o Jotform carrega as opções por JavaScript e não deu pra extrair as originais |
-| `logoUrl` | já aponta para `logo.png` — **salve o arquivo do logo com esse nome, na mesma pasta do `index.html`**, e ele aparece sozinho (ver abaixo) |
+| `logoUrl` | ✅ pronto — usa o `logo.png` oficial |
 | Telefone `(34) 0000-0000` | fictício, aparece no painel lateral — está no HTML, não no `CONFIG` |
 
 Taxas confirmadas: **R$ 30,00 por palete** e **R$ 1,00 por volume**
@@ -138,17 +138,25 @@ Taxas confirmadas: **R$ 30,00 por palete** e **R$ 1,00 por volume**
 
 ### O logo
 
-Salve o arquivo oficial como **`logo.png`**, na mesma pasta do `index.html`.
-Não precisa editar nada: o formulário tenta carregar esse arquivo e, se encontrar,
-troca o logo desenhado pelo oficial, já numa placa branca — necessária porque o
-selo do logo é vermelho e sumiria sobre o painel vermelho.
+O logo oficial já está no lugar, sobre uma placa branca — necessária porque o
+selo do logo é vermelho e sumiria sobre o painel vermelho do formulário.
 
-Se o arquivo não existir, o formulário continua funcionando com a versão
-desenhada em SVG (a cabeça de zebu é uma aproximação feita à mão).
+| Arquivo | Uso |
+|---|---|
+| `logo.png` | o que vai para o ar: 440×311, 27 KB |
+| `logo-original.png` | o arquivo entregue pelo cliente: 1880×1330, 196 KB |
 
-> Se tiver o arquivo **vetorial** (`.svg`, `.ai`, `.eps` ou `.pdf`), prefira o `.svg`
-> — fica nítido em qualquer tamanho e em telas de alta resolução. Nesse caso salve
-> como `logo.svg` e ajuste `logoUrl: "logo.svg"`.
+O `logo.png` é uma redução do original para o tamanho em que ele realmente
+aparece na tela (220px, dobrado para telas de alta resolução). O arquivo cheio
+pesava quatro vezes mais que a página inteira, o que conta num formulário
+preenchido no celular, muitas vezes fora do Wi-Fi.
+
+Para trocar o logo depois, substitua o `logo.png` mantendo o nome. Se um dia
+aparecer a versão **vetorial** (`.svg`), é melhor ainda: salve como `logo.svg`,
+ajuste `logoUrl: "logo.svg"` e pode apagar os PNGs.
+
+Se nenhum arquivo de logo existir, o formulário não quebra — ele cai numa versão
+desenhada em SVG, que fica no HTML como reserva.
 
 ---
 
