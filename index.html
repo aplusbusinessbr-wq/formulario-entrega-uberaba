@@ -105,10 +105,13 @@ body{
 .brand.has-logo{
   background:#fff;
   border-radius:16px;
-  padding:14px 20px;
+  /* padding curto de propósito: o PNG já traz margem transparente
+     em volta do selo, e somar as duas deixava a placa inchada */
+  padding:7px 15px;
+  width:fit-content;      /* sem isto a placa esticava na largura do painel */
   box-shadow:0 8px 22px -12px rgba(0,0,0,.45);
 }
-.brand.has-logo img{display:block;width:100%;max-width:220px;height:auto}
+.brand.has-logo img{display:block;width:220px;max-width:100%;height:auto}
 .zebu{filter:drop-shadow(0 3px 0 rgba(0,0,0,.18))}
 .wordmark{
   font-family:'Baloo 2',cursive;
@@ -506,8 +509,8 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
   .rail h1{font-size:clamp(30px,7.5vw,40px);margin-top:14px}
   .rail p.lede{margin-top:10px;font-size:14px}
   .wordmark{font-size:38px}
-  .brand.has-logo{padding:11px 15px}
-  .brand.has-logo img{max-width:170px}
+  .brand.has-logo{padding:6px 12px}
+  .brand.has-logo img{width:170px}
 
   /* as 4 regras viram cartões 2×2 em vez de lista longa */
   .facts{grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
