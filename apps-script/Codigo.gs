@@ -311,6 +311,54 @@ function escapar(v) {
     .replace(/"/g, '&quot;');
 }
 
+/* ---------- ABA "AGENDA" ---------- */
+
+/**
+ * Cria (ou refaz) a aba "Agenda": a visão que o pessoal da doca abre de manhã.
+ *
+ * A aba "Agendamentos" é um log — ordem de chegada, 15 colunas, incluindo
+ * coisas que só o sistema usa. Esta aqui mostra só o que interessa, das
+ * entregas de hoje em diante, ordenadas por dia e janela.
+ *
+ * É uma fórmula viva: não precisa rodar de novo a cada agendamento.
+ * Rode uma vez pelo editor, ou de novo se quiser recriar a aba do zero.
+ */
+function criarAbaAgenda() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  let aba = ss.getSheetByName('Agenda');
+  if (aba) {
+    aba.clear();
+  } else {
+    aba = ss.insertSheet('Agenda', 0);   // primeira aba: é a que abre por padrão
+  }
+
+  const cabecalho = ['Data', 'Janela', 'Empresa', 'Produto', 'Paletes', 'Volumes', 'Telefone', 'Protocolo'];
+  aba.getRange(1, 1, 1, cabecalho.length)
+     .setValues([cabecalho])
+     .setFontWeight('bold')
+     .setBackground('#EB3439')
+     .setFontColor('#FFFFFF');
+  aba.setFrozenRows(1);
+
+  // A comparação usa a coluna ISO (texto aaaa-mm-dd), que ordena
+  // corretamente como string — a coluna dd/MM/yyyy não ordenaria.
+  const formula =
+    '=IFERROR(QUERY(' + CONFIG.aba + '!A2:O, ' +
+    '"select G, I, C, J, L, M, E, B ' +
+    'where H >= \'"&TEXT(TODAY(),"yyyy-mm-dd")&"\' ' +
+    'order by H, I", 0), "Nenhuma entrega agendada a partir de hoje.")';
+
+  aba.getRange('A2').setFormula(formula);
+
+  const larguras = [110, 90, 260, 170, 90, 100, 150, 190];
+  larguras.forEach(function (px, i) { aba.setColumnWidth(i + 1, px); });
+
+  aba.getRange('E:F').setHorizontalAlignment('center');
+
+  SpreadsheetApp.getActiveSpreadsheet().toast('Aba "Agenda" pronta.', 'Uberaba', 5);
+}
+
 /* ---------- TESTE ---------- */
 
 /**
