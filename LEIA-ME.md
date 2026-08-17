@@ -96,16 +96,28 @@ e o e-mail continua indo pro endereço de teste. A URL **não muda**.
 
 ---
 
-## Parte 2 — Publicar o formulário
+## Parte 2 — Onde o projeto está publicado
 
-O arquivo é estático, então serve em qualquer lugar. O mais rápido:
+| | |
+|---|---|
+| **Formulário no ar** | https://formulario-entrega-uberaba.vercel.app |
+| **Código** | https://github.com/aplusbusinessbr-wq/formulario-entrega-uberaba |
 
-**Netlify Drop** — acesse [app.netlify.com/drop](https://app.netlify.com/drop) e
-arraste a pasta com o `index.html`. Sai no ar em segundos, com HTTPS, numa URL do
-tipo `nome-aleatorio.netlify.app`. Dá pra renomear e apontar um domínio próprio
-depois (ex.: `entregas.uberabasupermercados.com.br`).
+O deploy é automático: qualquer `git push` para a branch `main` republica o site
+em segundos. Para atualizar depois de editar um arquivo:
 
-Alternativas equivalentes: Vercel, GitHub Pages, Cloudflare Pages.
+```bash
+git add -A && git commit -m "descricao da mudanca" && git push
+```
+
+A Vercel também gera um link de pré-visualização para cada branch, útil para
+mostrar uma alteração ao cliente sem mexer no link oficial.
+
+### Domínio próprio (opcional)
+
+Dá para apontar algo como `entregas.uberabasupermercados.com.br` no painel da
+Vercel, em *Settings → Domains*. Precisa que alguém com acesso ao DNS do domínio
+crie um registro CNAME apontando para `cname.vercel-dns.com`.
 
 ---
 
