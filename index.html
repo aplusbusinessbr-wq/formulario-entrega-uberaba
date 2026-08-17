@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agendamento de Entrega — Uberaba Supermercados</title>
-<meta name="description" content="Agende sua entrega no centro de recebimento do Uberaba Supermercados. Recebimento até as 14h.">
+<meta name="description" content="Agende sua entrega no centro de recebimento do Uberaba Supermercados. Quatro janelas por dia, de segunda a sexta.">
 <meta name="theme-color" content="#EB3439">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -270,8 +270,35 @@ legend .num{
 }
 
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.field label{font-size:13.5px;font-weight:600}
+.field label,.field .lbl{font-size:13.5px;font-weight:600}
 .req{color:var(--red);font-weight:700}
+
+/* ---------- janelas de horário ---------- */
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.slot{cursor:pointer;display:block}
+.slot input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.slot span{
+  display:flex;align-items:center;justify-content:center;
+  padding:15px 8px;
+  border:1.5px solid var(--line-strong);
+  border-radius:var(--r-md);
+  background:#fff;
+  font-family:'Oswald',sans-serif;
+  font-weight:500;
+  font-size:19px;
+  letter-spacing:.03em;
+  color:var(--ink);
+  transition:border-color .16s var(--ease), background .16s var(--ease), color .16s;
+}
+.slot:hover span{border-color:var(--red);color:var(--red-900)}
+.slot input:checked + span{
+  border-color:var(--red);
+  background:var(--red-050);
+  color:var(--red-900);
+  box-shadow:inset 0 0 0 1px var(--red);
+}
+.slot input:focus-visible + span{outline:3px solid var(--teal);outline-offset:2px}
+.slots[aria-invalid=true] .slot span{border-color:var(--danger);background:#FFF7F6}
 .hint{font-size:12px;color:var(--ink-soft);line-height:1.4;margin:0}
 
 input[type=text],input[type=tel],input[type=date],select,textarea{
@@ -602,7 +629,7 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
       </div>
 
       <ul class="facts">
-        <li><b>até 14h</b><span>Horário limite de recebimento</span></li>
+        <li><b>Seg a sex</b><span>07:30 · 09:30 · 13:00 · 15:00</span></li>
         <li><b>R$ 30</b><span>Por palete descarregado</span></li>
         <li><b>R$ 1</b><span>Por volume descarregado</span></li>
         <li><b>NF</b><span>Quantidades conforme a nota</span></li>
@@ -625,7 +652,7 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
           <h2>Formulário de Entrega</h2>
           <p>Leva menos de 2 minutos. Campos com <span class="req">*</span> são obrigatórios.</p>
         </div>
-        <div class="stamp" aria-hidden="true">Recebimento<br>até 14:00</div>
+        <div class="stamp" aria-hidden="true">4 janelas<br>por dia</div>
       </div>
 
       <form id="form" novalidate>
@@ -674,11 +701,8 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
             </div>
 
             <div class="field">
-              <label for="hora">Horário <span class="req">*</span></label>
-              <select id="hora" name="hora" aria-describedby="hora-err">
-                <option value="">Selecione um horário</option>
-              </select>
-              <p class="hint">Recebimento das 06:00 às 14:00.</p>
+              <span class="lbl" id="hora-label">Horário <span class="req">*</span></span>
+              <div class="slots" id="hora" role="radiogroup" aria-labelledby="hora-label" aria-describedby="hora-err"></div>
               <p class="err" id="hora-err"></p>
             </div>
           </div>
@@ -754,7 +778,7 @@ input[aria-invalid=true]:focus,select[aria-invalid=true]:focus{box-shadow:0 0 0 
 
           <label class="check" for="confirmo">
             <input type="checkbox" id="confirmo" name="confirmo" aria-describedby="confirmo-err">
-            <span>Confirmo que os dados acima conferem com a nota fiscal e que a entrega chegará até as 14:00.</span>
+            <span>Confirmo que os dados acima conferem com a nota fiscal e que a carga chegará no horário reservado.</span>
           </label>
           <p class="err" id="confirmo-err" style="margin-top:8px"></p>
         </fieldset>
@@ -835,8 +859,13 @@ const CONFIG = {
   precoVolume: 1,
 
   // Janela de recebimento
-  horaInicio: 6,
-  horaFim: 14,
+  // As 4 janelas de recebimento do dia. Para mudar, é só editar esta lista —
+  // os botões na tela são gerados a partir dela.
+  horarios: ['07:30', '09:30', '13:00', '15:00'],
+
+  // Dias da semana que aceitam entrega. 0=domingo ... 6=sábado.
+  // Hoje: segunda a sexta.
+  diasSemana: [1, 2, 3, 4, 5],
   intervaloMin: 30,
 
   // Opções do campo "Qual produto será entregue?"
@@ -880,13 +909,14 @@ const selProduto = $('#produto');
 selProduto.innerHTML = '<option value="">Selecione o produto</option>' +
   CONFIG.produtos.map(p => `<option value="${p}">${p}</option>`).join('');
 
-// popula horários
-const selHora = $('#hora');
-for (let m = CONFIG.horaInicio * 60; m <= CONFIG.horaFim * 60; m += CONFIG.intervaloMin) {
-  const h = String(Math.floor(m / 60)).padStart(2, '0');
-  const min = String(m % 60).padStart(2, '0');
-  selHora.insertAdjacentHTML('beforeend', `<option value="${h}:${min}">${h}:${min}</option>`);
-}
+// monta as janelas de horário como botões (melhor de tocar no celular
+// do que um seletor, e mostra todas as opções de uma vez)
+const boxHora = $('#hora');
+boxHora.innerHTML = CONFIG.horarios.map(h => `
+  <label class="slot">
+    <input type="radio" name="hora" value="${h}">
+    <span>${h}</span>
+  </label>`).join('');
 
 // data mínima = hoje
 const inputData = $('#data');
@@ -953,7 +983,15 @@ const REGRAS = {
   empresa:  v => v.trim().length >= 2 ? '' : 'Informe o nome da empresa.',
   cnpj:     v => !v.trim() ? 'Informe o CNPJ.' : (validaCNPJ(v) ? '' : 'CNPJ inválido — confira os números.'),
   telefone: v => v.replace(/\D/g,'').length >= 10 ? '' : 'Informe um telefone com DDD.',
-  data:     v => !v ? 'Escolha a data da entrega.' : (v < iso(new Date()) ? 'A data não pode ser no passado.' : ''),
+  data:     v => {
+    if (!v) return 'Escolha a data da entrega.';
+    if (v < iso(new Date())) return 'A data não pode ser no passado.';
+    // meio-dia de propósito: new Date('2026-08-22') é meia-noite em UTC e, no
+    // fuso do Brasil, cairia no dia anterior — o dia da semana sairia errado
+    const dia = new Date(v + 'T12:00:00').getDay();
+    if (!CONFIG.diasSemana.includes(dia)) return 'Não há recebimento nesse dia. Escolha de segunda a sexta.';
+    return '';
+  },
   hora:     v => v ? '' : 'Escolha um horário.',
   produto:  v => v ? '' : 'Selecione o produto.',
   outro:    v => $('#outro-wrap').hidden || v.trim().length >= 2 ? '' : 'Descreva o produto.',
@@ -961,12 +999,25 @@ const REGRAS = {
   volumes:  v => v === '' ? 'Informe a quantidade (use 0 se não houver).' : (Number(v) >= 0 ? '' : 'Valor inválido.')
 };
 
+/* o horário é um grupo de botões, não um campo comum: o valor vem do rádio marcado */
+function valorDe(id) {
+  if (id === 'hora') {
+    const marcado = boxHora.querySelector('input[name="hora"]:checked');
+    return marcado ? marcado.value : '';
+  }
+  return $('#' + id).value;
+}
+
 function valida(id) {
-  return setErro(id, REGRAS[id]($('#' + id).value));
+  return setErro(id, REGRAS[id](valorDe(id)));
 }
 
 Object.keys(REGRAS).forEach(id => {
   const el = $('#' + id);
+  if (id === 'hora') {
+    el.addEventListener('change', () => valida(id));
+    return;
+  }
   el.addEventListener('blur', () => valida(id));
   el.addEventListener('input', () => { if (el.getAttribute('aria-invalid')) valida(id); });
 });
@@ -1060,7 +1111,7 @@ form.addEventListener('submit', async (e) => {
     telefone: inputTel.value,
     responsavel: $('#responsavel').value.trim(),
     data: `${dia}/${mes}/${ano}`,
-    hora: selHora.value,
+    hora: valorDe('hora'),
     produto: produtoFinal,
     nf: $('#nf').value.trim(),
     paletes: p,
