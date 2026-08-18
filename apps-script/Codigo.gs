@@ -424,6 +424,51 @@ function criarAbaAgenda() {
   SpreadsheetApp.getActiveSpreadsheet().toast('Aba "Agenda" pronta.', 'Uberaba', 5);
 }
 
+/* ---------- MANUTENÇÃO ---------- */
+
+/**
+ * Apaga agendamentos pelo protocolo.
+ *
+ * É assim que se cancela uma entrega: a linha sai da planilha e a janela
+ * volta a aparecer livre no formulário, sem precisar mexer em mais nada.
+ * Devolve quantas linhas foram apagadas.
+ */
+function apagarPorProtocolo(protocolos) {
+  const aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.aba);
+  if (!aba || aba.getLastRow() < 2) return 0;
+
+  const alvo = {};
+  protocolos.forEach(function (p) { alvo[String(p).trim()] = true; });
+
+  const linhas = aba.getRange(2, 1, aba.getLastRow() - 1, COLUNAS.length).getValues();
+  let apagadas = 0;
+
+  // de baixo para cima: apagar uma linha de cima renumera todas as de baixo,
+  // e o laço passaria a apontar para a linha errada
+  for (let i = linhas.length - 1; i >= 0; i--) {
+    if (alvo[String(linhas[i][1]).trim()]) {
+      aba.deleteRow(i + 2);   // +2: a linha 1 é o cabeçalho
+      apagadas++;
+    }
+  }
+
+  Logger.log('Linhas apagadas: ' + apagadas);
+  return apagadas;
+}
+
+/**
+ * Remove os três agendamentos criados durante a instalação.
+ * Rode uma vez, antes de entregar a planilha ao cliente.
+ */
+function limparAgendamentosDeTeste() {
+  const n = apagarPorProtocolo([
+    'UBE-TESTE-0001',       // função testarEnvio
+    'UBE-20260817-5372',    // primeiro envio pelo formulário
+    'UBE-TESTE-VALID'       // teste da validação no servidor
+  ]);
+  Logger.log(n + ' agendamento(s) de teste removido(s).');
+}
+
 /* ---------- TESTE ---------- */
 
 /**
