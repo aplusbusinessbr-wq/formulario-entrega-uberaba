@@ -469,6 +469,57 @@ function limparAgendamentosDeTeste() {
   Logger.log(n + ' agendamento(s) de teste removido(s).');
 }
 
+/**
+ * Importa reservas que já existiam no Jotform antigo, para que o formulário
+ * novo não ofereça uma janela que já tem entrega marcada durante a transição.
+ *
+ * Não temos os dados do fornecedor — eles seguem no formulário antigo. A linha
+ * entra só para ocupar a janela, identificada pelo protocolo "ANTIGO-...".
+ *
+ * Pode rodar de novo sem medo: janela que já consta é pulada. Se aparecerem
+ * novas marcações no Jotform, acrescente aqui e rode outra vez.
+ */
+function importarDoFormularioAntigo() {
+  const reservas = [
+    ['2026-08-19', '09:30'],
+    ['2026-08-19', '13:00'],
+    ['2026-08-20', '09:30'],
+    ['2026-08-24', '09:30']
+  ];
+
+  let criadas = 0, jaExistiam = 0;
+
+  reservas.forEach(function (r) {
+    const dataIso = r[0], hora = r[1];
+
+    if (horariosOcupadosEm(dataIso).indexOf(hora) !== -1) {
+      jaExistiam++;
+      return;
+    }
+
+    const p = dataIso.split('-');
+    gravarNaPlanilha({
+      protocolo: 'ANTIGO-' + dataIso.replace(/-/g, '') + '-' + hora.replace(':', ''),
+      empresa: 'Agendado no formulário antigo',
+      cnpj: '',
+      telefone: '',
+      responsavel: '',
+      data: p[2] + '/' + p[1] + '/' + p[0],
+      dataIso: dataIso,
+      hora: hora,
+      produto: '—',
+      nf: '',
+      paletes: 0,
+      volumes: 0,
+      total: 0,
+      observacao: 'Reserva vinda do Jotform. Os dados do fornecedor estão no formulário antigo.'
+    });
+    criadas++;
+  });
+
+  Logger.log('Janelas bloqueadas: ' + criadas + ' | já constavam: ' + jaExistiam);
+}
+
 /* ---------- TESTE ---------- */
 
 /**
